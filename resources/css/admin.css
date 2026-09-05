@@ -1,0 +1,85 @@
+/* 1. Import Google Fonts (HANYA Plus Jakarta Sans untuk kejelasan maksimal) */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* 2. Panggil Tailwind v4 Engine */
+@import "tailwindcss";
+
+/* 3. Daftarkan Warna ke dalam Tema */
+@theme {
+    /* Identitas Hanania (Digunakan sparingly / irit) */
+    --color-hanania-purple: #61398F; 
+    --color-hanania-purple-dark: #4A2B6E; 
+    --color-hanania-gold: #CBA358; 
+    
+    /* Font tunggal untuk admin */
+    --font-sans: "Plus Jakarta Sans", sans-serif;
+}
+
+/* 4. Pengaturan Dasar Halaman ADMIN */
+@layer base {
+    body {
+        /* Background admin HARUS netral agar mata tidak lelah */
+        background-color: #F8FAFC; /* Slate 50 - Sangat adem di mata */
+        color: #334155; /* Slate 700 - Abu-abu gelap untuk teks bacaan */
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        min-height: 100vh;
+    }
+
+    /* Judul di admin pakai warna gelap standar, bukan ungu */
+    h1, h2, h3, h4, h5, h6 {
+        color: #0F172A; /* Slate 900 - Hitam tegas */
+        font-weight: 700;
+        letter-spacing: -0.01em;
+    }
+}
+
+/* 5. Komponen Kustom UI/UX ADMIN */
+@layer components {
+    
+    /* Kartu untuk Dashboard/Tabel Admin (Clean & Crisp) */
+    .card-admin {
+        background-color: #ffffff;
+        border: 1px solid #E2E8F0; /* Slate 200 - Border netral tipis */
+        border-radius: 1rem; /* 16px */
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* Shadow standar, bukan ungu */
+        transition: box-shadow 0.2s ease;
+    }
+
+    /* Tombol Utama Admin (Tetap pakai warna brand tapi lebih kaku/profesional) */
+    .btn-admin-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        background-color: var(--color-hanania-purple);
+        color: #ffffff;
+        font-weight: 600;
+        border-radius: 0.5rem; /* 8px - Lebih bersudut dibanding customer */
+        padding: 0.5rem 1rem;
+        transition: background-color 0.2s ease;
+    }
+
+    .btn-admin-primary:hover {
+        background-color: var(--color-hanania-purple-dark);
+    }
+    
+    /* Styling Tabel Standar Dewa */
+    .table-admin th {
+        background-color: #F1F5F9; /* Slate 100 */
+        color: #475569; /* Slate 600 */
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #E2E8F0;
+    }
+    
+    .table-admin td {
+        padding: 1rem;
+        border-bottom: 1px solid #F1F5F9;
+        font-size: 0.875rem;
+    }
+}
