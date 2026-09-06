@@ -50,6 +50,11 @@ return new class extends Migration
 
             $table->string('profile_image')->nullable();
 
+            // 🏦 TAMBAHAN BARU: Informasi Rekening Bank Jamaah untuk Keperluan Refund
+            $table->string('bank_name')->nullable();           // Contoh: BCA, Mandiri, BSI
+            $table->string('bank_account_number')->nullable(); // Nomor Rekening
+            $table->string('bank_account_name')->nullable();   // Nama Pemilik Rekening
+
             $table->enum('status', [
                 'active',
                 'inactive',

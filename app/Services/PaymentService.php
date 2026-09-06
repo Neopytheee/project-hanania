@@ -52,94 +52,107 @@ class PaymentService
         ?string $referenceNumber = null,
         ?string $proofFile = null
     ): PaymentTransaction {
-        $paymentPlan = $enrollment->paymentPlan;
-
-        if (!$paymentPlan) {
-            throw new \RuntimeException('Payment plan tidak ditemukan.');
-        }
-
-        if ($amount <= 0) {
-            throw new \InvalidArgumentException('Nominal pembayaran harus lebih dari Rp0.');
-        }
-
-        if ($type === 'initial_deposit') {
-            $hasInitialDeposit = $paymentPlan->transactions()
-                ->where('type', 'initial_deposit')
-                ->whereIn('status', ['pending', 'verified'])
-                ->exists();
-
-            if ($hasInitialDeposit) {
-                // Pesan error diperjelas agar jamaah tidak bingung
-                throw new \RuntimeException('Setoran awal sedang diproses admin atau sudah lunas. Harap tunggu verifikasi selesai sebelum membuat tagihan baru.');
-            }
-        }
-
-        if ($type === 'additional_payment') {
-            $hasVerifiedInitial = $paymentPlan->transactions()
-                ->where('type', 'initial_deposit')
-                ->where('status', 'verified')
-                ->exists();
-
-            if (!$hasVerifiedInitial) {
-                throw new \RuntimeException('Pembayaran ditolak! Anda wajib melunasi Setoran Awal (Minimal Rp 1.000.000) terlebih dahulu.');
-            }
-        }
-
-        // 1. Buat Data Transaksi di Database
-        $transaction = PaymentTransaction::create([
-            'payment_plan_id'    => $paymentPlan->id,
-            'transaction_number' => $this->generateTransactionNumber(),
-            'type'               => $type,
-            'amount'             => $amount,
-            'payment_method'     => $paymentMethod,
-            'reference_number'   => $referenceNumber,
-            'proof_file'         => $proofFile,
-            'status'             => 'pending',
-        ]);
-
-        // 2. JIKA METODE MIDTRANS
-        if ($paymentMethod === 'midtrans') {
-            Config::$serverKey = env('MIDTRANS_SERVER_KEY');
-            Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
-            Config::$isSanitized = true;
-            Config::$is3ds = true;
-
-            // 🛑 CARA PAMUNGKAS: Paksa Midtrans membaca URL ini menggunakan CURL Options 🛑
-            $urlNgrokAktif = 'https://baton-drizzle-tameness.ngrok-free.dev'; // Pastikan ini URL hari ini
-            $notificationUrl = $urlNgrokAktif . '/api/midtrans/notification';
+        // 🛡️ Bungkus dengan Database Transaction & Row Locking untuk mencegah Race Condition
+        return DB::transaction(function () use ($enrollment, $amount, $type, $paymentMethod, $referenceNumber, $proofFile) {
             
-            // Menggunakan fitur append HTTP headers bawaan library Midtrans
-            Config::$curlOptions = [
-                CURLOPT_HTTPHEADER => [
-                    'X-Override-Notification: ' . $notificationUrl
-                ]
-            ];
+            // Kunci baris payment_plan agar aman dari double-submission bersamaan
+            $paymentPlan = $enrollment->paymentPlan()->lockForUpdate()->first();
+
+            if (!$paymentPlan) {
+                throw new \RuntimeException('Payment plan tidak ditemukan.');
+            }
+
+            if ($amount <= 0) {
+                throw new \InvalidArgumentException('Nominal pembayaran harus lebih dari Rp0.');
+            }
+
+            // ==========================================
+            // 🛡️ VALIDASI MINIMAL DEPOSIT & SETORAN
+            // ==========================================
+            $rules = $this->getNextPaymentRules($enrollment);
             
+            if ($amount < $rules['min_amount']) {
+                $formatRupiah = 'Rp ' . number_format($rules['min_amount'], 0, ',', '.');
+                $pesanError = $rules['is_first_payment'] 
+                    ? "Pembayaran ditolak! Setoran awal (DP) wajib minimal {$formatRupiah}."
+                    : "Nominal kurang! Setoran tabungan lanjutan minimal adalah {$formatRupiah}.";
+                    
+                throw new \InvalidArgumentException($pesanError);
+            }
 
+            if ($type === 'initial_deposit') {
+                $hasInitialDeposit = $paymentPlan->transactions()
+                    ->where('type', 'initial_deposit')
+                    ->whereIn('status', ['pending', 'verified'])
+                    ->exists();
 
-            $params = [
-                'transaction_details' => [
-                    'order_id'     => $transaction->transaction_number, 
-                    'gross_amount' => (int) $transaction->amount,
-                ],
+                if ($hasInitialDeposit) {
+                    throw new \RuntimeException('Setoran awal sedang diproses admin atau sudah lunas. Harap tunggu verifikasi selesai.');
+                }
+            }
 
-                'customer_details' => [
-                    'first_name' => $enrollment->customer->name ?? 'Jamaah',
-                    'phone'      => $enrollment->customer->phone ?? '08123456789',
-                    'email'      => $enrollment->customer->email ?? 'jamaah@hananiatravel.com', 
-                ],
-                'expiry' => [
-                    'unit'     => 'minute',
-                    'duration' => 5,
-                ],
-            ];
+            if ($type === 'additional_payment') {
+                $hasVerifiedInitial = $paymentPlan->transactions()
+                    ->where('type', 'initial_deposit')
+                    ->where('status', 'verified')
+                    ->exists();
 
-            $snapToken = Snap::getSnapToken($params);
-            $transaction->snap_token = $snapToken;
-            $transaction->save();
-        }
+                if (!$hasVerifiedInitial) {
+                    throw new \RuntimeException('Pembayaran ditolak! Anda wajib melunasi Setoran Awal terlebih dahulu.');
+                }
+            }
 
-        return $transaction;
+            // 1. Buat Data Transaksi di Database
+            $transaction = PaymentTransaction::create([
+                'payment_plan_id'    => $paymentPlan->id,
+                'transaction_number' => $this->generateTransactionNumber(),
+                'type'               => $type,
+                'amount'             => $amount,
+                'payment_method'     => $paymentMethod,
+                'reference_number'   => $referenceNumber,
+                'proof_file'         => $proofFile,
+                'status'             => 'pending',
+            ]);
+
+            // 2. JIKA METODE MIDTRANS
+            if ($paymentMethod === 'midtrans') {
+                Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+                Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
+                Config::$isSanitized = true;
+                Config::$is3ds = true;
+
+                $urlNgrokAktif = 'https://baton-drizzle-tameness.ngrok-free.dev'; 
+                $notificationUrl = $urlNgrokAktif . '/api/midtrans/notification';
+                
+                Config::$curlOptions = [
+                    CURLOPT_HTTPHEADER => [
+                        'X-Override-Notification: ' . $notificationUrl
+                    ]
+                ];
+                
+                $params = [
+                    'transaction_details' => [
+                        'order_id'     => $transaction->transaction_number, 
+                        'gross_amount' => (int) $transaction->amount,
+                    ],
+                    'customer_details' => [
+                        'first_name' => $enrollment->customer->name ?? 'Jamaah',
+                        'phone'      => $enrollment->customer->phone ?? '08123456789',
+                        'email'      => $enrollment->customer->email ?? 'jamaah@hananiatravel.com', 
+                    ],
+                    'expiry' => [
+                        'unit'     => 'minute',
+                        'duration' => 5,
+                    ],
+                ];
+
+                $snapToken = Snap::getSnapToken($params);
+                $transaction->snap_token = $snapToken;
+                $transaction->save();
+            }
+
+            return $transaction;
+        });
     }
     
     /**

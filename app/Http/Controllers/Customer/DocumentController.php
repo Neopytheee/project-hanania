@@ -62,11 +62,19 @@ class DocumentController extends Controller
     /**
      * Memaksa browser untuk melakukan PREVIEW file (bukan download)
      */
+    /**
+     * Memaksa browser untuk melakukan PREVIEW file secara aman dari celah IDOR
+     */
     public function preview($id)
     {
-        // Sesuaikan nama model Document dengan yang bosku pakai
-        $document = \App\Models\Document::findOrFail($id); 
+        // Ambil dokumen beserta relasi enrollment dan customer-nya
+        $document = \App\Models\Document::with('enrollment.customer')->findOrFail($id); 
         
+        // 🛡️ AMAN KELAS BERAT: Validasi kepemilikan dokumen
+        if (!$document->enrollment || $document->enrollment->customer_id !== auth()->user()->customer->id) {
+            abort(403, 'Akses ditolak. Dokumen ini bukan milik Anda.');
+        }
+
         // Ambil path fisik file di dalam folder storage Laravel
         $path = storage_path('app/public/' . $document->file_path);
 
@@ -75,8 +83,6 @@ class DocumentController extends Controller
             abort(404, 'File dokumen tidak ditemukan.');
         }
 
-        // response()->file() ini adalah kunci ajaibnya!
-        // Laravel otomatis akan menambahkan header "inline" agar browser melakukan preview
         return response()->file($path);
     }
 }

@@ -48,11 +48,11 @@
             <p class="text-[9px] font-black uppercase tracking-[.2em] text-hanania-purple">Akun Anda</p>
             <h1 class="font-heading text-[30px] sm:text-[38px] font-black tracking-tight text-hanania-purple-dark mt-1">Profil Saya</h1>
             <p class="text-[12px] sm:text-[13px] text-gray-500 mt-2 font-medium max-w-2xl">
-                Kelola informasi pribadi, keamanan, dan bantuan akun Anda di {{ $shortCompanyName }}.
+                Kelola informasi pribadi, rekening bank, keamanan, dan bantuan akun Anda di {{ $shortCompanyName }}.
             </p>
         </div>
 
-        <!-- PROFILE HERO: 60% DARK / 30% PURPLE-LIGHT / 10% GOLD ACCENT -->
+        <!-- PROFILE HERO -->
         <section class="relative overflow-hidden rounded-[2rem] bg-hanania-purple-dark text-white border border-hanania-purple/10 shadow-xl mb-8">
             <div class="absolute right-0 top-0 w-[38%] h-full bg-hanania-purple/25"></div>
             <div class="absolute -right-16 -top-16 w-56 h-56 rounded-full border-[28px] border-hanania-purple-light/10"></div>
@@ -67,21 +67,17 @@
                             <div class="absolute -inset-2 rounded-full bg-hanania-gold/10 blur-md"></div>
                             
                             @if(isset($customer) && $customer->profile_image)
-                                <!-- Jika user sudah upload foto profil -->
                                 <img src="{{ asset('storage/' . $customer->profile_image) }}" alt="Foto Profil {{ $user->name }}" class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-white/15 shadow-lg bg-white">
                             @else
-                                <!-- Jika foto profil masih kosong (Tampilkan Inisial) -->
                                 <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-hanania-gold-light to-hanania-gold text-white flex items-center justify-center text-[38px] sm:text-[44px] font-black border-4 border-white/15 shadow-lg">
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 </div>
                             @endif
 
-                            <!-- Tombol Edit Foto Kecil (Mengarahkan ke halaman Edit) -->
                             <a href="{{ route('customer.profile.edit') }}" class="absolute bottom-0 right-0 w-8 h-8 bg-white text-hanania-purple rounded-full flex items-center justify-center shadow-lg border border-hanania-purple/10 hover:bg-hanania-purple hover:text-white transition-colors cursor-pointer">
                                 <span class="material-symbols-outlined text-[16px]">edit</span>
                             </a>
                         </div>
-                        <!-- 📸 END LOGIKA FOTO PROFIL -->
 
                         <div class="min-w-0">
                             <p class="text-[9px] uppercase tracking-[.2em] font-black text-hanania-purple-light">Identitas Jamaah</p>
@@ -145,6 +141,21 @@
                     <span class="material-symbols-outlined text-[18px] text-hanania-purple/35 group-hover:text-hanania-gold group-hover:translate-x-1 transition-all">arrow_forward</span>
                 </a>
 
+                <!-- 🏦 REKENING BANK REFUND (MENU BARU) -->
+                <a href="{{ route('customer.profile.bank.edit') }}" class="profile-row group bg-white rounded-[1.7rem] border border-hanania-purple/10 p-5 sm:p-6 shadow-sm hover:bg-hanania-purple-light/30 hover:border-hanania-gold/30 flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-4 min-w-0">
+                        <div class="w-12 h-12 rounded-2xl bg-hanania-purple-light flex items-center justify-center text-hanania-purple border border-hanania-purple/10 shrink-0 group-hover:bg-hanania-purple group-hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-[23px]">account_balance</span>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[8px] uppercase tracking-[.16em] font-black text-hanania-purple">Keuangan</p>
+                            <h3 class="font-heading text-[15px] sm:text-[16px] font-black text-hanania-purple-dark mt-0.5 group-hover:text-hanania-purple transition-colors">Rekening Bank Refund</h3>
+                            <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1 leading-relaxed">Atur nomor rekening untuk keperluan pencairan dana.</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-[18px] text-hanania-purple/35 group-hover:text-hanania-gold group-hover:translate-x-1 transition-all">arrow_forward</span>
+                </a>
+
                 <!-- PASSWORD -->
                 <a href="{{ route('customer.profile.password') }}" class="profile-row group bg-white rounded-[1.7rem] border border-hanania-purple/10 p-5 sm:p-6 shadow-sm hover:bg-hanania-purple-light/30 hover:border-hanania-gold/30 flex items-center justify-between gap-4">
                     <div class="flex items-center gap-4 min-w-0">
@@ -176,7 +187,7 @@
                 </a>
 
                 <!-- LOGOUT -->
-                <form method="POST" action="{{ route('logout') }}" class="block">
+                <form method="POST" action="{{ route('logout') }}" class="block lg:col-span-2">
                     @csrf
                     <button type="submit" class="profile-row group w-full h-full bg-white rounded-[1.7rem] border border-hanania-purple/10 p-5 sm:p-6 shadow-sm hover:bg-red-50 hover:border-red-200 flex items-center justify-between gap-4 text-left">
                         <div class="flex items-center gap-4 min-w-0">

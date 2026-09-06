@@ -8,25 +8,53 @@ use App\Models\PaymentPlan;
 use App\Models\TravelPackage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Exception; // Tambahkan ini untuk melempar error validasi
 
 class EnrollmentService
 {
     public function create(Customer $customer, TravelPackage $travelPackage, array $data = []): Enrollment
     {
-        return DB::transaction(function () use ($customer, $travelPackage, $data) {
-            
-            // Tentukan data penumpang (Jika 'Diri Sendiri', otomatis pakai nama dari data customer)
-            $relationship = $data['relationship'] ?? 'Diri Sendiri';
-            $passengerName = ($relationship === 'Diri Sendiri') 
-                ? $customer->name 
-                : ($data['passenger_name'] ?? $customer->name);
+        // ==========================================
+        // 🛡️ LAPIS 1: VALIDASI ANTI-SPAM (Maks. 2 Pending)
+        // ==========================================
+        $pendingCount = Enrollment::where('customer_id', $customer->id)
+            ->whereIn('status', ['enrolled', 'payment_due'])
+            ->count();
 
-            // 1. Buat Enrollment (Pendaftaran) beserta info penumpangnya
+        if ($pendingCount >= 2) {
+            throw new Exception('Selesaikan dulu pembayaran setoran awal pada pendaftaran Anda sebelumnya sebelum memilih paket baru ya!');
+        }
+
+        // Tentukan data penumpang
+        $relationship = $data['relationship'] ?? 'Diri Sendiri';
+        $passengerName = ($relationship === 'Diri Sendiri') 
+            ? $customer->name 
+            : ($data['passenger_name'] ?? $customer->name);
+
+        // ==========================================
+        // 🛡️ LAPIS 2: VALIDASI ANTI-GANDA
+        // ==========================================
+        $isDuplicate = Enrollment::where('customer_id', $customer->id)
+            ->where('travel_package_id', $travelPackage->id)
+            ->where('passenger_name', $passengerName)
+            ->whereNotIn('status', ['cancelled', 'completed'])
+            ->exists();
+
+        if ($isDuplicate) {
+            throw new Exception('Nama jamaah ini sudah terdaftar di paket tersebut. Silakan pilih paket lain atau cek daftar tabungan Anda.');
+        }
+
+        // ==========================================
+        // 💾 PROSES SIMPAN DATABASE
+        // ==========================================
+        return DB::transaction(function () use ($customer, $travelPackage, $passengerName, $relationship) {
+            
+            // 1. Buat Enrollment (Pendaftaran)
             $enrollment = Enrollment::create([
                 'enrollment_number'        => $this->generateEnrollmentNumber($travelPackage),
                 'customer_id'              => $customer->id,
-                'passenger_name'           => $passengerName, // <-- Disimpan di sini
-                'relationship'             => $relationship,  // <-- Disimpan di sini
+                'passenger_name'           => $passengerName, 
+                'relationship'             => $relationship,  
                 'travel_package_id'        => $travelPackage->id,
                 'unique_code'              => random_int(100,999),
                 'estimated_price_snapshot' => $travelPackage->estimated_price,
@@ -54,7 +82,7 @@ class EnrollmentService
         if ($enrollment->paymentPlan) {
             $enrollment->paymentPlan->transactions()
                 ->where('status', 'pending')
-                ->whereNotNull('snap_token') // Hanya khusus Midtrans
+                ->whereNotNull('snap_token')
                 ->where('created_at', '<', now()->subMinutes(5))
                 ->delete();
         }
@@ -62,14 +90,10 @@ class EnrollmentService
 
     protected function generateEnrollmentNumber(TravelPackage $travelPackage): string
     {
-        // 💡 LOGIKA IF-ELSE PREFIX
-        // Jika kategori HAJI maka awalan 'HJI', selain itu 'UMR' (Umroh)
         $prefix = ($travelPackage->category === 'HAJI') ? 'HJI' : 'UMR';
 
         do {
-            // Hasilnya misal: HJI-202609-3438 atau UMR-202609-3438
             $number = $prefix . '-' . now()->format('Ym') . '-' . random_int(1000, 9999);
-            
         } while (Enrollment::where('enrollment_number', $number)->exists());
 
         return $number;
@@ -80,12 +104,8 @@ class EnrollmentService
      */
     public function calculateProgress(Enrollment $enrollment): array
     {
-        // 1. Ambil harga paket target:
-        // Prioritaskan 'final_price' (jika sudah masuk kloter). 
-        // Jika belum, gunakan 'estimated_price_snapshot' saat awal mendaftar.
         $totalHarga = $enrollment->final_price ?? $enrollment->estimated_price_snapshot ?? 0;
         
-        // 2. Hitung total dibayar dari transaksi yang "verified"
         $totalDibayar = 0;
         if ($enrollment->paymentPlan) {
             $totalDibayar = (float) $enrollment->paymentPlan->transactions()
@@ -93,7 +113,6 @@ class EnrollmentService
                                         ->sum('amount');
         }
         
-        // 3. Hitung sisa dan persentase
         $sisaTagihan = max(0, $totalHarga - $totalDibayar);
         $persentase = 0;
 

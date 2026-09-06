@@ -45,11 +45,19 @@ class EnrollmentController extends Controller
         $validated = $request->validated();
         $package = TravelPackage::findOrFail($validated['travel_package_id']);
 
-        // TERUSKAN $request->all() KE DALAM SERVICE DI SINI 👇
-        $enrollment = $this->enrollmentService->create($customer, $package, $request->all());
+        // BUNGKUS DENGAN TRY-CATCH
+        try {
+            // TERUSKAN $request->all() KE DALAM SERVICE DI SINI 👇
+            $enrollment = $this->enrollmentService->create($customer, $package, $request->all());
 
-        return redirect()->route('customer.enrollments.show', $enrollment->id)
-                     ->with('success', 'Alhamdulillah, Anda berhasil mulai menabung untuk paket ' . $package->name);
+            return redirect()->route('customer.enrollments.show', $enrollment->id)
+                         ->with('success', 'Alhamdulillah, Anda berhasil mulai menabung untuk paket ' . $package->name);
+                         
+        } catch (\Exception $e) {
+            // TANGKAP ERROR DARI SERVICE (VALIDASI ANTI-SPAM & GANDA)
+            // Dan lempar kembali sebagai pesan error (flash message)
+            return back()->with('error', $e->getMessage())->withInput();
+        }
     }
 
     /**

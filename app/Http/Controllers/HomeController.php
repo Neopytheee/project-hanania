@@ -28,4 +28,12 @@ class HomeController extends Controller
         
         return view('welcome', compact('galleries', 'testimonials', 'featuredPackages'));
     }
+
+    public function galeri()
+{
+    // Ambil semua data galeri (bisa pakai paginate misal per 12 foto biar ringan)
+    $galleries = \App\Models\Gallery::with('category')->latest()->paginate(12);
+    
+    return view('pages.gallery', compact('galleries'));
+}
 }

@@ -57,4 +57,28 @@ class ProfileController extends Controller
 
         return redirect()->route('customer.profile.index')->with('success', 'Keamanan terjaga! Password Anda berhasil diubah.');
     }
+
+    // ==========================================
+    // BAGIAN REKENING BANK
+    // ==========================================
+    public function editBankAccount()
+    {
+        $user = auth()->user();
+        $customer = $user->customer;
+        
+        return view('customer.profile.bank', compact('user', 'customer'));
+    }
+
+    public function updateBankAccount(Request $request, ProfileService $profileService)
+    {
+        $request->validate([
+            'bank_name'           => ['required', 'string', 'max:100'],
+            'bank_account_number' => ['required', 'string', 'max:50'],
+            'bank_account_name'   => ['required', 'string', 'max:255'],
+        ]);
+
+        $profileService->updateBankAccount(auth()->user(), $request->all());
+
+        return redirect()->route('customer.profile.index')->with('success', 'Alhamdulillah, informasi rekening bank berhasil diperbarui!');
+    }
 }

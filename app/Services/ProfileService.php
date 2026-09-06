@@ -52,4 +52,20 @@ class ProfileService
             'password' => Hash::make($newPassword)
         ]);
     }
+
+    /**
+     * Memperbarui Informasi Rekening Bank Jamaah
+     */
+    public function updateBankAccount(User $user, array $data): void
+    {
+        $customer = $user->customer;
+
+        if ($customer) {
+            $customer->update([
+                'bank_name'           => $data['bank_name'] ?? $customer->bank_name,
+                'bank_account_number' => $data['bank_account_number'] ?? $customer->bank_account_number,
+                'bank_account_name'   => $data['bank_account_name'] ?? $customer->bank_account_name,
+            ]);
+        }
+    }
 }

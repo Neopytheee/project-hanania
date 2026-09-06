@@ -21,7 +21,7 @@
 @endphp
 
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id" translate="no" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
@@ -65,8 +65,8 @@
 <body class="antialiased text-hanania-purple-dark bg-hanania-purple-light flex flex-col min-h-screen selection:bg-hanania-gold selection:text-white">
 
     @auth
-        @include('components.sidebar')
     @endauth
+    @include('components.sidebar')
 
     @include('components.navbar')
 
@@ -729,7 +729,7 @@
 
 
                     <a
-                        href="{{ route('login') }}"
+                        href="{{ route('customer.dashboard') }}"
                         class="inline-flex items-center justify-center gap-2 rounded-full bg-hanania-purple px-6 py-3.5 text-sm font-bold text-white hover:bg-hanania-purple-dark transition-colors shrink-0"
                     >
                         Masuk Dashboard
@@ -891,25 +891,23 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-10">
-
                 <div>
-
                     <span class="text-[10px] sm:text-[11px] uppercase tracking-[0.18em] font-extrabold text-hanania-purple">
                         Jejak Perjalanan
                     </span>
-
                     <h2 class="mt-2 font-heading text-3xl sm:text-4xl font-extrabold text-hanania-purple-dark">
                         Momen bersama jamaah.
                     </h2>
-
+                    <p class="mt-2 text-sm text-gray-500 max-w-xl leading-relaxed">
+                        Potongan cerita perjalanan di Tanah Suci, tempat niat berubah menjadi kenangan.
+                    </p>
                 </div>
 
-
-                <p class="text-sm text-gray-500 max-w-xl leading-relaxed">
-                    Potongan cerita perjalanan di Tanah Suci,
-                    tempat niat berubah menjadi kenangan.
-                </p>
-
+                <!-- TOMBOL LIHAT SEMUA GALERI -->
+                <a href="{{ route('pages.gallery') }}" class="inline-flex items-center gap-2 rounded-full border border-hanania-purple/15 px-5 py-3 text-sm font-bold text-hanania-purple hover:bg-hanania-purple-light transition-colors self-start md:self-auto">
+                    Lihat Semua
+                    <span class="material-symbols-outlined text-[17px]">arrow_outward</span>
+                </a>
             </div>
 
 

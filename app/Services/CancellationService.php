@@ -112,10 +112,20 @@ class CancellationService
     {
         return DB::transaction(function () use ($cancellation, $admin, $data) {
             
-            // 1. Update status pengajuan beserta file bukti
+            // 1. Hitung total tabungan saat ini sebelum ditarik
+            $paymentPlan = $cancellation->enrollment->paymentPlan;
+            $totalSaved = $paymentPlan ? (float) $paymentPlan->transactions()->where('status', 'verified')->sum('amount') : 0;
+            
+            $refundAmount = (float) $data['refund_amount'];
+
+            // 💡 DETEKSI CERDAS: Apakah ini penarikan sebagian atau pembatalan total?
+            // Dicek dari teks alasan (apakah ada kata TARIK DANA SEBAGIAN) atau jika nominal tarik < total saldo
+            $isPartialWithdrawal = str_contains($cancellation->reason, 'TARIK DANA SEBAGIAN') || ($refundAmount < $totalSaved);
+
+            // 2. Update status pengajuan beserta file bukti
             $cancellation->update([
                 'status'               => 'refunded',
-                'refund_amount'        => $data['refund_amount'],
+                'refund_amount'        => $refundAmount,
                 'penalty_amount'       => $data['penalty_amount'] ?? 0,
                 'admin_acc_document'   => $data['acc_path'],
                 'admin_transfer_proof' => $data['transfer_path'],
@@ -123,22 +133,30 @@ class CancellationService
                 'reviewed_by'          => $admin->id,
             ]);
 
-            // 2. TRIK SAKTI: Transaksi Negatif untuk memotong saldo tabungan
-            if ($cancellation->enrollment->paymentPlan) {
+            // 3. TRIK SAKTI: Transaksi Negatif untuk memotong saldo tabungan
+            if ($paymentPlan) {
                 \App\Models\PaymentTransaction::create([
-                    'payment_plan_id'    => $cancellation->enrollment->paymentPlan->id,
+                    'payment_plan_id'    => $paymentPlan->id,
                     'transaction_number' => 'TRX-REF-' . time() . '-' . rand(100, 999), 
-                    'amount'             => -abs($data['refund_amount']), // Nilai minus
+                    'amount'             => -abs($refundAmount), // Nilai minus
                     'type'               => 'refund',
                     'status'             => 'verified',
                     'payment_method'     => 'manual_transfer',
                 ]);
             }
 
-            // 3. Opsional (Tapi Penting): Pastikan status enrollment juga berubah jadi 'cancelled'
-            $cancellation->enrollment->update([
-                'status' => 'cancelled'
-            ]);
+            // 4. ATUR STATUS ENROLLMENT BERDASARKAN JENIS PENARIKAN
+            if ($isPartialWithdrawal) {
+                // JIKA TARIK SEBAGIAN: Status enrollment TETAP 'saving', jamaah bisa lanjut menabung!
+                $cancellation->enrollment->update([
+                    'status' => 'saving'
+                ]);
+            } else {
+                // JIKA TARIK SEMUA / BATAL TOTAL: Baru ubah status jadi 'cancelled'
+                $cancellation->enrollment->update([
+                    'status' => 'cancelled'
+                ]);
+            }
 
             return $cancellation;
         });

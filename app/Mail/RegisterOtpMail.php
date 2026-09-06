@@ -22,7 +22,7 @@ class RegisterOtpMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Kode Verifikasi Registrasi Hanania Travel',
+            subject: 'Kode Verifikasi Registrasi Hanania',
         );
     }
 
@@ -30,7 +30,7 @@ class RegisterOtpMail extends Mailable
     {
         // Mengarahkan ke file tampilan (view) email
         return new Content(
-            view: 'emails.otp_register',
+            view: 'emails.otp-register',
         );
     }
 }

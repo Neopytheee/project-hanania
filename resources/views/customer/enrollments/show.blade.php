@@ -425,9 +425,27 @@
                         @endif
                     @endif
 
-                    <!-- CANCEL -->
-                    @if($enrollment->status !== 'completed' && $enrollment->status !== 'cancelled')
-                        <a href="{{ route('customer.cancellations.create', $enrollment->id) }}" class="flex items-center justify-center gap-1.5 text-red-500 hover:text-white font-bold text-[11px] hover:bg-red-500 px-4 py-2.5 rounded-full transition-colors border border-red-100 bg-white w-full">
+                    <!-- CANCEL / TARIK DANA -->
+                    @php
+                        // Cek apakah ada pengajuan pembatalan/refund yang sedang aktif berjalan
+                        $activeRequest = $enrollment->cancellationRequests()
+                            ->whereIn('status', ['requested', 'under_review', 'refund_processing'])
+                            ->first();
+                    @endphp
+
+                    @if($enrollment->status == 'completed')
+                        <!-- Jika sudah selesai, tombol sembunyikan -->
+                    @elseif($enrollment->status == 'cancelled')
+                        <!-- Jika sudah dibatalkan total, sembunyikan tombol -->
+                    @elseif($activeRequest)
+                        <!-- Jika sedang ada pengajuan aktif, ubah jadi badge info -->
+                        <div class="flex items-center justify-center gap-1.5 text-amber-600 font-bold text-[11px] bg-amber-50 px-4 py-2.5 rounded-full border border-amber-200 w-full shadow-sm">
+                            <span class="material-symbols-outlined text-[16px]">hourglass_top</span>
+                            Pengajuan Diproses Admin
+                        </div>
+                    @else
+                        <!-- Jika belum ada pengajuan, tampilkan tombol utama -->
+                        <a href="{{ route('customer.cancellations.create', $enrollment->id) }}" class="flex items-center justify-center gap-1.5 text-red-500 hover:text-white font-bold text-[11px] hover:bg-red-500 px-4 py-2.5 rounded-full transition-colors border border-red-100 bg-white w-full shadow-sm">
                             <span class="material-symbols-outlined text-[16px]">cancel</span>
                             Batalkan / Tarik Dana
                         </a>

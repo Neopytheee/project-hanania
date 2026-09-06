@@ -12,20 +12,23 @@ class Customer extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'customer_number',
-        'name',
-        'nik',
-        'phone',
-        'email',
-        'birth_date',
-        'gender',
-        'address',
-        'emergency_contact_name',
-        'emergency_contact_phone',
-        'profile_image',
-        'status',
-    ];
+    'user_id',
+    'customer_number',
+    'name',
+    'nik',
+    'phone',
+    'email',
+    'birth_date',
+    'gender',
+    'address',
+    'emergency_contact_name',
+    'emergency_contact_phone',
+    'profile_image',
+    'status',
+    'bank_name',           // 🏦 Tambahan Baru
+    'bank_account_number', // 🏦 Tambahan Baru
+    'bank_account_name',   // 🏦 Tambahan Baru
+];
 
     protected function casts(): array
     {

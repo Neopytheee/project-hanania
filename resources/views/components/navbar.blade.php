@@ -4,37 +4,99 @@
     $logoUrl = $logoPath ? asset('storage/' . $logoPath) : asset('images/HananiaNew4K.png');
 @endphp
 
-<!-- FIXED TOP DENGAN Z-40 AGAR TIDAK MENIMPA SIDEBAR -->
+<!-- FIXED TOP -->
 <div class="fixed w-full top-4 z-40 px-4 sm:px-6 lg:px-8 pointer-events-none">
     <nav class="max-w-7xl mx-auto bg-white/80 backdrop-blur-xl border border-hanania-purple/10 shadow-lg rounded-full px-4 sm:px-6 py-3 flex justify-between items-center pointer-events-auto transition-all relative">
 
-        <!-- ================= BAGIAN KIRI ================= -->
+        <!-- LOGO KIRI -->
         <div class="flex items-center shrink-0">
             <a href="{{ url('/') }}" class="flex items-center gap-2 sm:gap-3 group shrink-0">
                 <img src="{{ $logoUrl }}" alt="Logo {{ $companyName }}" class="h-9 sm:h-11 w-auto object-contain transition-transform group-hover:scale-105">
             </a>
         </div>
 
-        <!-- ================= BAGIAN TENGAH ================= -->
-        <div class="hidden lg:flex items-center gap-1 xl:gap-2 absolute left-1/2 transform -translate-x-1/2">
+        <!-- ================= MENU DESKTOP TENGAH ================= -->
+        <div class="hidden lg:flex items-center gap-1 absolute left-1/2 transform -translate-x-1/2">
             @auth
-                <a href="{{ url('/') }}" class="px-4 py-2 rounded-full text-[13px] font-bold transition-all {{ request()->is('/') || request()->is('') ? 'bg-hanania-purple-light text-hanania-purple shadow-sm' : 'text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50' }}">Home</a>
-                <a href="{{ route('customer.dashboard') }}" class="px-4 py-2 rounded-full text-[13px] font-bold transition-all {{ request()->routeIs('customer.dashboard') ? 'bg-hanania-purple-light text-hanania-purple shadow-sm' : 'text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50' }}">Dashboard</a>
-                <a href="{{ route('packages.index') }}" class="px-4 py-2 rounded-full text-[13px] font-bold transition-all {{ request()->routeIs('packages.*') ? 'bg-hanania-purple-light text-hanania-purple shadow-sm' : 'text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50' }}">Paket</a>
-                <a href="{{ route('customer.enrollments.index') }}" class="px-4 py-2 rounded-full text-[13px] font-bold transition-all {{ request()->routeIs('customer.enrollments.*') || request()->routeIs('customer.payments.*') ? 'bg-hanania-purple-light text-hanania-purple shadow-sm' : 'text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50' }}">Tabungan saya</a>
-                <a href="{{ route('customer.profile.index') }}" class="px-4 py-2 rounded-full text-[13px] font-bold transition-all {{ request()->routeIs('customer.profile.*') ? 'bg-hanania-purple-light text-hanania-purple shadow-sm' : 'text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50' }}">Profil</a>
-                <a href="{{ route('about.index') }}" class="px-4 py-2 rounded-full text-[13px] font-bold transition-all {{ request()->routeIs('about.index*') ? 'bg-hanania-purple-light text-hanania-purple shadow-sm' : 'text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50' }}">Tentang Kami</a>
+                <a href="{{ url('/') }}" class="whitespace-nowrap px-3 xl:px-4 py-2 rounded-full text-[13px] font-bold transition-all {{ request()->is('/') || request()->is('') ? 'bg-hanania-purple-light text-hanania-purple shadow-sm' : 'text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50' }}">Home</a>
+                <a href="{{ route('customer.dashboard') }}" class="whitespace-nowrap px-3 xl:px-4 py-2 rounded-full text-[13px] font-bold transition-all {{ request()->routeIs('customer.dashboard') ? 'bg-hanania-purple-light text-hanania-purple shadow-sm' : 'text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50' }}">Dashboard</a>
+                <a href="{{ route('packages.index') }}" class="whitespace-nowrap px-3 xl:px-4 py-2 rounded-full text-[13px] font-bold transition-all {{ request()->routeIs('packages.*') ? 'bg-hanania-purple-light text-hanania-purple shadow-sm' : 'text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50' }}">Paket</a>
+                <a href="{{ route('customer.enrollments.index') }}" class="whitespace-nowrap px-3 xl:px-4 py-2 rounded-full text-[13px] font-bold transition-all {{ request()->routeIs('customer.enrollments.*') || request()->routeIs('customer.payments.*') ? 'bg-hanania-purple-light text-hanania-purple shadow-sm' : 'text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50' }}">Tabungan saya</a>
+                <a href="{{ route('customer.profile.index') }}" class="whitespace-nowrap px-3 xl:px-4 py-2 rounded-full text-[13px] font-bold transition-all {{ request()->routeIs('customer.profile.*') ? 'bg-hanania-purple-light text-hanania-purple shadow-sm' : 'text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50' }}">Profil</a>
+                <a href="{{ url('/') }}#galeri" class="whitespace-nowrap px-3 xl:px-4 py-2 rounded-full text-[13px] font-bold transition-all text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50">Galeri</a>
+                <a href="{{ route('about.index') }}" class="whitespace-nowrap px-3 xl:px-4 py-2 rounded-full text-[13px] font-bold transition-all {{ request()->routeIs('about.index*') ? 'bg-hanania-purple-light text-hanania-purple shadow-sm' : 'text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50' }}">Tentang Kami</a>
             @else
-                <a href="{{ url('/') }}" class="px-4 py-2 rounded-full text-[13px] font-bold transition-all text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50">Beranda</a>
-                <a href="{{ url('/') }}#paket" class="px-4 py-2 rounded-full text-[13px] font-bold transition-all text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50">Paket</a>
-                <a href="{{ url('/') }}#fitur" class="px-4 py-2 rounded-full text-[13px] font-bold transition-all text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50">Tentang Kami</a>
-                <a href="{{ url('/') }}#galeri" class="px-4 py-2 rounded-full text-[13px] font-bold transition-all text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50">Galeri</a>
+                <a href="{{ url('/') }}" class="whitespace-nowrap px-3 xl:px-4 py-2 rounded-full text-[13px] font-bold transition-all text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50">Beranda</a>
+                <a href="{{ url('/') }}#paket" class="whitespace-nowrap px-3 xl:px-4 py-2 rounded-full text-[13px] font-bold transition-all text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50">Paket</a>
+                <a href="{{ url('/') }}#galeri" class="whitespace-nowrap px-3 xl:px-4 py-2 rounded-full text-[13px] font-bold transition-all text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50">Galeri</a>
+                <a href="{{ url('/') }}#fitur" class="whitespace-nowrap px-3 xl:px-4 py-2 rounded-full text-[13px] font-bold transition-all text-gray-500 hover:text-hanania-purple hover:bg-hanania-purple-light/50">Tentang Kami</a>
             @endauth 
         </div>
 
-        <!-- ================= BAGIAN KANAN ================= -->
-        <div class="flex items-center gap-3 shrink-0">
-            @auth  
+        <!-- BAGIAN KANAN (Notifikasi & Tombol Hamburger) -->
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+            @auth 
+                <!-- Tombol Lonceng -->
+                <div class="relative">
+                    <button type="button" onclick="toggleNotifikasi(event)" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white border border-hanania-purple/10 flex items-center justify-center text-hanania-purple hover:bg-hanania-purple-light active:scale-90 transition-all shadow-sm relative z-50">
+                        <span class="material-symbols-outlined text-[20px]">notifications</span>
+                        @if(auth()->user()->unreadNotifications->count() > 0)
+                            <span class="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 border-2 border-white text-white text-[9px] sm:text-[10px] font-bold flex items-center justify-center rounded-full animate-pulse">
+                                {{ auth()->user()->unreadNotifications->count() }}
+                            </span>
+                        @endif
+                    </button>
+
+                    <!-- Kotak Dropdown Notifikasi -->
+                    <div id="dropdownNotifikasi" class="hidden absolute right-0 top-12 sm:top-14 mt-1 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 z-40 overflow-hidden">
+                        <div class="px-5 py-3.5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-sm text-hanania-purple-dark">Notifikasi Baru</span>
+                                @if(auth()->user()->unreadNotifications->count() > 0)
+                                    <span class="bg-hanania-purple-light text-hanania-purple text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                        {{ auth()->user()->unreadNotifications->count() }} Baru
+                                    </span>
+                                @endif
+                            </div>
+                            @if(auth()->user()->unreadNotifications->count() > 0)
+                                <a href="{{ route('notifikasi.baca-semua') }}" class="text-[11px] font-bold text-hanania-purple hover:underline flex items-center gap-1 transition-all">
+                                    <span class="material-symbols-outlined text-[14px]">done_all</span>
+                                    Tandai semua dibaca
+                                </a>
+                            @endif
+                        </div>
+                        <div class="max-h-96 overflow-y-auto custom-scrollbar">
+                            @forelse(auth()->user()->unreadNotifications()->take(5)->get() as $notification)
+                                <a href="{{ route('notifikasi.baca', $notification->id) }}" class="block p-4 hover:bg-hanania-purple-light/30 border-b border-gray-50 transition-all">
+                                    <div class="flex gap-4">
+                                        <div class="w-10 h-10 rounded-full bg-hanania-purple/10 text-hanania-purple flex items-center justify-center shrink-0">
+                                            <span class="material-symbols-outlined text-lg">campaign</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-bold text-gray-800 leading-tight">
+                                                {{ $notification->data['title'] ?? 'Pemberitahuan' }}
+                                            </p>
+                                            <p class="text-xs text-gray-500 leading-normal mt-1.5">
+                                                {{ $notification->data['message'] ?? '' }}
+                                            </p>
+                                            <p class="text-xs font-semibold text-gray-400 mt-2 flex items-center gap-1">
+                                                <span class="material-symbols-outlined text-[13px]">schedule</span>
+                                                {{ $notification->created_at->diffForHumans() }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            @empty
+                                <div class="p-8 text-center text-gray-400 flex flex-col items-center justify-center gap-3">
+                                    <span class="material-symbols-outlined text-4xl text-gray-200">notifications_paused</span>
+                                    <span class="text-sm font-medium">Belum ada notifikasi.</span>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOMBOL LOGOUT DESKTOP -->
                 <form method="POST" action="{{ route('logout') }}" class="hidden lg:block m-0 p-0">
                     @csrf
                     <button type="submit" class="w-10 h-10 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm flex items-center justify-center" title="Keluar Akun">
@@ -48,90 +110,11 @@
                 </a>
             @endauth
 
-            <button onclick="toggleSidebar()" class="lg:hidden w-9 h-9 rounded-full bg-white border border-hanania-purple/10 flex items-center justify-center text-hanania-purple hover:bg-hanania-purple-light active:scale-90 transition-all shadow-sm">
+            <!-- TOMBOL HAMBURGER MENU (Klik Buka Sidebar) -->
+            <button onclick="toggleSidebar()" class="lg:hidden w-9 h-9 rounded-full bg-white border border-hanania-purple/10 flex items-center justify-center text-hanania-purple hover:bg-hanania-purple-light active:scale-90 transition-all shadow-sm relative z-50">
                 <span class="material-symbols-outlined text-[20px]">menu</span>
             </button>
         </div>
 
     </nav>
 </div>
-
-<!-- OVERLAY GELAP -->
-<div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-hanania-purple-dark/30 backdrop-blur-sm z-[60] hidden transition-all duration-300 opacity-0 cursor-pointer lg:hidden"></div>
-
-<!-- SIDEBAR MUNCUL DARI KANAN (Menggunakan h-[100dvh] agar akurat di HP) -->
-<aside id="sidebar" class="fixed top-0 right-0 h-[100dvh] w-[260px] sm:w-[280px] bg-white border-l border-hanania-purple/10 z-[70] transform translate-x-full transition-transform duration-300 ease-out flex flex-col shadow-[-10px_0_30px_rgba(97,57,143,0.1)] lg:hidden">
-
-    <!-- HEADER SIDEBAR -->
-    <div class="h-16 flex items-center justify-between px-5 border-b border-hanania-purple/10 shrink-0 bg-white">
-        <h3 class="font-heading font-black text-hanania-purple text-[16px] tracking-widest uppercase">Menu</h3>
-        <button onclick="toggleSidebar()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-hanania-purple/10 text-hanania-purple-dark hover:text-hanania-purple hover:bg-hanania-purple-light active:scale-90 transition-all shadow-sm">
-            <span class="material-symbols-outlined text-[18px]">close</span>
-        </button>
-    </div>
-
-    <!-- MENU LINKS SIDEBAR (Yang bisa di-scroll hanya area ini) -->
-    <nav class="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-2 custom-scrollbar">
-        @auth
-            <a href="{{ url('/') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98] group {{ request()->is('/') || request()->is('') ? 'bg-hanania-purple-light text-hanania-purple font-bold shadow-sm border-r-4 border-hanania-gold' : 'text-hanania-purple-dark hover:bg-hanania-purple-light/60 hover:text-hanania-purple' }}">
-                <span class="material-symbols-outlined {{ request()->is('/') ? '[font-variation-settings:\'FILL\'_1]' : 'group-hover:scale-110 transition-transform duration-300' }}">home</span>
-                <span class="text-[14.5px] font-sans">Home</span>
-            </a>
-            <a href="{{ route('customer.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98] group {{ request()->routeIs('customer.dashboard') ? 'bg-hanania-purple-light text-hanania-purple font-bold shadow-sm border-r-4 border-hanania-gold' : 'text-hanania-purple-dark hover:bg-hanania-purple-light/60 hover:text-hanania-purple' }}">
-                <span class="material-symbols-outlined {{ request()->routeIs('customer.dashboard') ? '[font-variation-settings:\'FILL\'_1]' : 'group-hover:scale-110 transition-transform duration-300' }}">dashboard</span>
-                <span class="text-[14.5px] font-sans">Dashboard</span>
-            </a>
-            <a href="{{ route('packages.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98] group {{ request()->routeIs('packages.*') ? 'bg-hanania-purple-light text-hanania-purple font-bold shadow-sm border-r-4 border-hanania-gold' : 'text-hanania-purple-dark hover:bg-hanania-purple-light/60 hover:text-hanania-purple' }}">
-                <span class="material-symbols-outlined {{ request()->routeIs('packages.*') ? '[font-variation-settings:\'FILL\'_1]' : 'group-hover:scale-110 transition-transform duration-300' }}">travel_explore</span>
-                <span class="text-[14.5px] font-sans">Paket</span>
-            </a>
-            <a href="{{ route('customer.enrollments.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98] group {{ request()->routeIs('customer.enrollments.*') || request()->routeIs('customer.payments.*') ? 'bg-hanania-purple-light text-hanania-purple font-bold shadow-sm border-r-4 border-hanania-gold' : 'text-hanania-purple-dark hover:bg-hanania-purple-light/60 hover:text-hanania-purple' }}">
-                <span class="material-symbols-outlined {{ request()->routeIs('customer.enrollments.*') || request()->routeIs('customer.payments.*') ? '[font-variation-settings:\'FILL\'_1]' : 'group-hover:scale-110 transition-transform duration-300' }}">account_balance_wallet</span>
-                <span class="text-[14.5px] font-sans">Tabungan Ibadah</span>
-            </a>
-            <a href="{{ route('about.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98] group {{ request()->routeIs('about.*') ? 'bg-hanania-purple-light text-hanania-purple font-bold shadow-sm border-r-4 border-hanania-gold' : 'text-hanania-purple-dark hover:bg-hanania-purple-light/60 hover:text-hanania-purple' }}">
-                <span class="material-symbols-outlined {{ request()->routeIs('about.*') ? '[font-variation-settings:\'FILL\'_1]' : 'group-hover:scale-110 transition-transform duration-300' }}">info</span>
-                <span class="text-[14.5px] font-sans">Tentang Kami</span>
-            </a>
-            <a href="{{ route('customer.profile.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98] group {{ request()->routeIs('customer.profile.*') ? 'bg-hanania-purple-light text-hanania-purple font-bold shadow-sm border-r-4 border-hanania-gold' : 'text-hanania-purple-dark hover:bg-hanania-purple-light/60 hover:text-hanania-purple' }}">
-                <span class="material-symbols-outlined {{ request()->routeIs('customer.profile.*') ? '[font-variation-settings:\'FILL\'_1]' : 'group-hover:scale-110 transition-transform duration-300' }}">person</span>
-                <span class="text-[14.5px] font-sans">Profil Anda</span>
-            </a>
-        @else
-            <a href="{{ url('/') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98] group text-hanania-purple-dark hover:bg-hanania-purple-light/60 hover:text-hanania-purple">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform duration-300">home</span>
-                <span class="text-[14.5px] font-sans">Beranda</span>
-            </a>
-            <a href="{{ url('/') }}#paket" onclick="toggleSidebar()" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98] group text-hanania-purple-dark hover:bg-hanania-purple-light/60 hover:text-hanania-purple">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform duration-300">travel_explore</span>
-                <span class="text-[14.5px] font-sans">Paket</span>
-            </a>
-            <a href="{{ url('/') }}#fitur" onclick="toggleSidebar()" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98] group text-hanania-purple-dark hover:bg-hanania-purple-light/60 hover:text-hanania-purple">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform duration-300">info</span>
-                <span class="text-[14.5px] font-sans">Tentang Kami</span>
-            </a>
-            <a href="{{ url('/') }}#galeri" onclick="toggleSidebar()" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98] group text-hanania-purple-dark hover:bg-hanania-purple-light/60 hover:text-hanania-purple">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform duration-300">photo_library</span>
-                <span class="text-[14.5px] font-sans">Galeri</span>
-            </a>
-        @endauth
-    </nav>
-
-    <!-- TOMBOL AKSI BAWAH PATEN (shrink-0 mt-auto memastikan nyangkut di bawah) -->
-    <div class="px-5 py-6 border-t border-hanania-purple/10 shrink-0 mt-auto bg-white">
-        @auth
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 font-semibold active:scale-[0.98] transition-all duration-200 group border border-transparent hover:border-red-100">
-                    <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform duration-300">logout</span>
-                    <span class="text-[14.5px] font-sans">Keluar Akun</span>
-                </button>
-            </form>
-        @else
-            <a href="{{ route('login') }}" class="w-full flex items-center justify-center gap-2 btn-hanania-gold py-3.5 rounded-xl font-bold active:scale-[0.98] transition-transform shadow-md">
-                Masuk / Daftar
-                <span class="material-symbols-outlined text-[18px]">login</span>
-            </a>
-        @endauth
-    </div>
-</aside>

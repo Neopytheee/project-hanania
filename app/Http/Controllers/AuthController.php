@@ -21,7 +21,7 @@ class AuthController extends Controller
 
     public function showAdminLoginForm()
     {
-        return view('auth.admin_login'); 
+        return view('auth.admin-login'); 
     }
 
     public function showRegisterForm()
@@ -93,6 +93,9 @@ class AuthController extends Controller
             'address'                 => 'required|string',
             'emergency_contact_name'  => 'required|string',
             'emergency_contact_phone' => 'required|string',
+            'bank_name'            => 'nullable|string|max:100',
+'bank_account_number'  => 'nullable|string|max:50',
+'bank_account_name'    => 'nullable|string|max:255',
         ]);
 
         // Generate OTP
@@ -120,7 +123,7 @@ class AuthController extends Controller
                              ->withErrors('Sesi pendaftaran tidak valid atau sudah kedaluwarsa. Silakan daftar ulang.');
         }
 
-        return view('auth.verify_otp', compact('email'));
+        return view('auth.verify-otp', compact('email'));
     }
 
     // ==========================================
