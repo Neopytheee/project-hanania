@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Verifikasi Akun - Hanania Travel</title>
+    <title>Verifikasi Akun - Hanania</title>
 </head>
 
 <body style="margin:0; padding:0; background-color:#F5EEFC; font-family:Arial, Helvetica, sans-serif; color:#4A2B6E;">
@@ -117,7 +117,7 @@
                             >
                                 Terima kasih telah mendaftar di
                                 <strong style="color:#61398F;">
-                                    Hanania Travel
+                                    Hanania
                                 </strong>.
                             </p>
 
@@ -250,7 +250,7 @@
                                 Wassalamu'alaikum Wr. Wb.
                                 <br>
                                 <strong>
-                                    Tim Hanania Travel
+                                    Tim Hanania
                                 </strong>
                             </p>
 
@@ -291,7 +291,7 @@
                                     font-weight:bold;
                                 "
                             >
-                                {{ $companyName ?? 'Hanania Travel' }}
+                                {{ $companyName ?? 'Hanania' }}
                             </p>
 
                         </td>

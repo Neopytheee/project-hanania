@@ -7,7 +7,7 @@
     @php
         $companyName = \App\Models\AppInformation::getValue(
             'company_name',
-            'Hanania Travel'
+            'Hanania'
         );
 
         $tagline = \App\Models\AppInformation::getValue(

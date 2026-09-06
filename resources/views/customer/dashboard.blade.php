@@ -39,7 +39,7 @@
                 date_default_timezone_set('Asia/Jakarta');
                 $hour = date('H');
 
-                $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania Travel');
+                $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania');
                 $shortCompanyName = explode(' ', $companyName)[0];
 
                 if ($hour < 11) {
@@ -308,7 +308,7 @@
                                 </div>
 
                                 <div class="min-w-0 px-1 md:px-0">
-                                    <p class="text-[8px] uppercase tracking-[.2em] text-hanania-purple font-black mb-1">Hanania Travel Package</p>
+                                    <p class="text-[8px] uppercase tracking-[.2em] text-hanania-purple font-black mb-1">Hanania Package</p>
                                     <h4 class="font-heading font-black text-[20px] sm:text-[24px] text-hanania-purple-dark leading-tight line-clamp-2 group-hover:text-hanania-purple transition-colors">
                                         {{ $package->name }}
                                     </h4>

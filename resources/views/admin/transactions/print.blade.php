@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Transaksi - {{ \App\Models\AppInformation::getValue('company_name') ?? 'Hanania Travel' }}</title>
+    <title>Laporan Transaksi - {{ \App\Models\AppInformation::getValue('company_name') ?? 'Hanania' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @media print {
@@ -31,7 +31,7 @@
         @endif
         
         <h1 class="text-2xl font-black uppercase tracking-widest mb-1">
-            {{ \App\Models\AppInformation::getValue('company_name') ?? 'Hanania Travel' }}
+            {{ \App\Models\AppInformation::getValue('company_name') ?? 'Hanania' }}
         </h1>
         
         <p class="text-[11px] font-medium max-w-lg">

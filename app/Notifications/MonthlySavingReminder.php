@@ -42,7 +42,7 @@ return (new MailMessage)
                 
                 // 3. Paragraf / Baris Isi Pesan (bisa ditambah banyak sesuai kebutuhan)
                 ->line('Alhamdulillah, hari ini sudah tanggal 25. Semoga Bpk/Ibu dalam keadaan sehat dan rezekinya senantiasa dilancarkan. 🙏')
-                ->line('Sekadar mengingatkan untuk menyisihkan sebagian rezeki bulan ini ke Tabungan ' . $this->enrollment->travelPackage->name . ' di Hanania Travel.')
+                ->line('Sekadar mengingatkan untuk menyisihkan sebagian rezeki bulan ini ke Tabungan ' . $this->enrollment->travelPackage->name . ' di Hanania.')
                 
                 // 4. Tombol Utama (Teks tombol & Link tujuannya)
                 ->action('Cek Tabungan & Setor Sekarang', route('customer.enrollments.show', $this->enrollment->id))

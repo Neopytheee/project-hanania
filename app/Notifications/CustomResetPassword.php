@@ -32,7 +32,7 @@ class CustomResetPassword extends Notification
 
         // Panggil template Blade buatan kita tadi
         return (new MailMessage)
-            ->subject('Permintaan Reset Kata Sandi - Hanania Travel')
+            ->subject('Permintaan Reset Kata Sandi - Hanania')
             ->view('emails.reset-password', ['url' => $url]); 
     }
 }

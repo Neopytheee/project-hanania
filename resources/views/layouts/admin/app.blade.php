@@ -1,6 +1,6 @@
 @php
     // Panggil variabelnya di sini agar tidak error jika ini file komponen terpisah
-    $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania Travel');
+    $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania');
 @endphp
 
 <!DOCTYPE html>

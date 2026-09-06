@@ -39,7 +39,7 @@
     </style>
 
     @php
-        $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania Travel');
+        $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania');
     @endphp
 
     <div class="w-full min-h-screen bg-slate-50/50 pt-24 pb-16">

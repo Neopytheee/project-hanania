@@ -1,7 +1,7 @@
 @php
     $companyName = \App\Models\AppInformation::getValue(
         'company_name',
-        'Hanania Travel'
+        'Hanania'
     );
 @endphp
 

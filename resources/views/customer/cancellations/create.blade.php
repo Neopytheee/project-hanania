@@ -5,7 +5,7 @@
 @section('content')
 @php
     // Tarik identitas perusahaan & nomor kontak dari database
-    $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania Travel');
+    $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania');
     $shortCompanyName = explode(' ', $companyName)[0];
     
     // Tarik nomor telepon, hilangkan karakter non-angka, lalu pastikan berawalan 62 untuk API WhatsApp

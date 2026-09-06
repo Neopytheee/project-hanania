@@ -5,7 +5,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta name="theme-color" content="#61398F">
 
-    <title>Kontak Kami - Hanania Travel</title>
+    <title>Kontak Kami - Hanania</title>
 
     <!-- Fonts & Icons -->
     <link
@@ -439,7 +439,7 @@
                                     </p>
 
                                     <p class="mt-1 font-heading text-lg font-extrabold text-white">
-                                        Hanania Travel
+                                        Hanania
                                     </p>
                                 </div>
 

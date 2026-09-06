@@ -34,7 +34,7 @@ class ChatbotService
 
     private function buildSystemPrompt($user): string
     {
-        $prompt = "Kamu adalah Hanania AI, asisten virtual cerdas dan ramah dari Hanania Travel. Jawablah dengan sopan, bernada islami, dan ringkas. Gunakan bold (**) untuk kata penting. Jangan berhalusinasi. Waktu saat ini: " . now()->format('d F Y H:i') . ".\n\n";
+        $prompt = "Kamu adalah Hanania AI, asisten virtual cerdas dan ramah dari Hanania. Jawablah dengan sopan, bernada islami, dan ringkas. Gunakan bold (**) untuk kata penting. Jangan berhalusinasi. Waktu saat ini: " . now()->format('d F Y H:i') . ".\n\n";
 
         // ==========================================
         // 🚀 INJEKSI DATA PAKET UMROH (KATALOG)

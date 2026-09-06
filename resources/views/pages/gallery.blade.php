@@ -1,10 +1,10 @@
 @extends('layouts.customer.app') 
 
-@section('title', 'Galeri Perjalanan - ' . \App\Models\AppInformation::getValue('company_name', 'Hanania Travel'))
+@section('title', 'Galeri Perjalanan - ' . \App\Models\AppInformation::getValue('company_name', 'Hanania'))
 
 @section('content')
 @php
-    $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania Travel');
+    $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania');
 @endphp
 
 <style>

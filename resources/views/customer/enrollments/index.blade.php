@@ -4,7 +4,7 @@
 
 @section('content')
     @php
-        $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania Travel');
+        $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania');
         $shortCompanyName = explode(' ', $companyName)[0];
     @endphp
 

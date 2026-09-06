@@ -351,7 +351,7 @@ class PaymentService
                 $nominal = number_format($transaction->amount, 0, ',', '.');
                 $pesan  = "Assalamu'alaikum Bpk/Ibu *{$nama}*,\n\n";
                 $pesan .= "Alhamdulillah, setoran tabungan Umroh Anda sebesar *Rp {$nominal}* telah TERVERIFIKASI.\n\n";
-                $pesan .= "Terima kasih telah mempercayakan perjalanan ibadah Anda bersama Hanania Travel. 🤲✨";
+                $pesan .= "Terima kasih telah mempercayakan perjalanan ibadah Anda bersama Hanania. 🤲✨";
 
                 // \App\Services\WhatsAppService::sendMessage($phone, $pesan);
             } else {

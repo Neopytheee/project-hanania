@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     @php
-        $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania Travel');
+        $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania');
     @endphp
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">

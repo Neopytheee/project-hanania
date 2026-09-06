@@ -5,7 +5,7 @@
 @section('content')
 @php
     // Tarik nama perusahaan dari database
-    $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania Travel');
+    $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania');
 @endphp
 
 <div class="animate-fade-in-up">

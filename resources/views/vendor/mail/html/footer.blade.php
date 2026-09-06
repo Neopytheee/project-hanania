@@ -1,5 +1,5 @@
 @php
-    $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania Travel');
+    $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania');
 @endphp
 
 <tr>

@@ -13,8 +13,8 @@ return new class extends Migration
 {
     Schema::create('app_informations', function (Blueprint $table) {
         $table->id();
-        $table->string('key')->unique(); // Contoh: 'nama_perusahaan', 'nomor_rekening'
-        $table->text('value')->nullable(); // Contoh: 'PT Hanania Travel', '7123456789'
+        $table->string('key')->unique();
+        $table->text('value')->nullable();
         $table->string('type')->default('string'); 
         $table->timestamps();
     });

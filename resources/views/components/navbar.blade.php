@@ -1,5 +1,5 @@
 @php
-    $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania Travel');
+    $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania');
     $logoPath = \App\Models\AppInformation::getValue('company_logo');
     $logoUrl = $logoPath ? asset('storage/' . $logoPath) : asset('images/HananiaNew4K.png');
 @endphp

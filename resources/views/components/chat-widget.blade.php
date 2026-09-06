@@ -37,7 +37,7 @@
                 <div class="bg-hanania-purple-light/40 p-3 sm:p-4 rounded-2xl sm:rounded-[1.25rem] rounded-tl-sm border border-hanania-purple/10 shadow-sm">
                     <p class="text-[13px] sm:text-[14px] text-hanania-purple-dark font-medium leading-relaxed">
                         Assalamu'alaikum, {{ auth()->user()->name ?? 'Bapak/Ibu' }}! 👋<br><br>
-                        Saya adalah Asisten AI Hanania Travel. Ada yang bisa saya bantu terkait informasi paket atau tabungan hari ini?
+                        Saya adalah Asisten AI Hanania. Ada yang bisa saya bantu terkait informasi paket atau tabungan hari ini?
                     </p>
                 </div>
             </div>

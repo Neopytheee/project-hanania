@@ -3,7 +3,7 @@
 <head>
     @php
         // Tarik nama perusahaan dari database
-        $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania Travel');
+        $companyName = \App\Models\AppInformation::getValue('company_name', 'Hanania');
     @endphp
     
     <meta charset="utf-8">
