@@ -51,7 +51,7 @@ return (new MailMessage)
                 ->line('Yuk, selangkah lebih dekat menuju Baitullah!')
                 
                 // 6. Salam Penutup
-                ->salutation("Salam hangat,\nManajemen Hanania Travel");
+                ->salutation("Salam hangat,\nManajemen Hanania");
     }
 
     // 🔔 KONTEN UNTUK DATABASE (Muncul di lonceng notif UI website)
