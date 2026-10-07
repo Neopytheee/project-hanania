@@ -3,6 +3,37 @@
 @section('header_title', 'Pengaturan Aplikasi')
 
 @section('content')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('payment_midtrans_enabled_input');
+        const buttons = document.querySelectorAll('.payment-midtrans-toggle-btn');
+
+        if (!input || !buttons.length) {
+            return;
+        }
+
+        const syncState = (value) => {
+            input.value = value;
+
+            buttons.forEach((button) => {
+                const isSelected = String(button.dataset.value) === String(value);
+                button.className = 'payment-midtrans-toggle-btn px-4 py-2 rounded-xl text-[11px] font-black border transition-all ' + (isSelected
+                    ? (value === '1'
+                        ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
+                        : 'bg-rose-500 text-white border-rose-500 shadow-sm')
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300');
+            });
+        };
+
+        buttons.forEach((button) => {
+            button.addEventListener('click', function () {
+                syncState(button.dataset.value);
+            });
+        });
+
+        syncState(input.value);
+    });
+</script>
 <div class="max-w-4xl mx-auto animate-fade-in-up pb-10">
     
     <!-- ========================================== -->
@@ -42,7 +73,7 @@
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-hanania-purple transition-colors">
                                 <span class="material-symbols-outlined text-[20px]">corporate_fare</span>
                             </div>
-                            <input type="text" name="company_name" value="{{ \App\Models\AppInformation::getValue('company_name') }}" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-bold text-slate-800 focus:bg-white focus:border-hanania-purple focus:ring-4 focus:ring-hanania-purple/10 outline-none transition-all shadow-sm" placeholder="Contoh: PT Hanania Berkah Travel" required>
+                            <input type="text" name="company_name" value="{{ \App\Models\AppInformation::getValue('company_name') }}" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-bold text-slate-800 focus:bg-white focus:border-hanania-purple focus:ring-4 focus:ring-hanania-purple/10 outline-none transition-all shadow-sm" placeholder="Contoh: PT Hanania" required>
                         </div>
                     </div>
 
@@ -83,8 +114,8 @@
                             </div>
                             <!-- Input File -->
                             <div class="flex-1">
-                                <input type="file" name="company_logo" accept="image/png, image/jpeg, image/jpg, image/webp" class="w-full text-[13px] text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[12px] file:font-bold file:bg-hanania-purple/10 file:text-hanania-purple hover:file:bg-hanania-purple hover:file:text-white cursor-pointer transition-all">
-                                <p class="text-[11px] text-slate-400 mt-1.5 font-medium">Format: JPG, PNG, WEBP (Latar Transparan). Maks 2MB.</p>
+                                <input type="file" name="company_logo" accept="image/png, image/jpeg" class="w-full text-[13px] text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[12px] file:font-bold file:bg-hanania-purple/10 file:text-hanania-purple hover:file:bg-hanania-purple hover:file:text-white cursor-pointer transition-all">
+                                <p class="text-[11px] text-slate-400 mt-1.5 font-medium">Format: JPG atau PNG. Maks 2MB.</p>
                             </div>
                         </div>
                     </div>
@@ -150,6 +181,29 @@
                 </h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Pembayaran Otomatis -->
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-2 uppercase tracking-wide">Pembayaran Otomatis (Midtrans)</label>
+                        <div class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div>
+                                    <p class="text-[13px] font-black text-slate-800">Status pembayaran otomatis</p>
+                                    <p class="text-[11px] text-slate-500 mt-1">Jika dinonaktifkan, customer hanya dapat memilih transfer manual.</p>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <input type="hidden" name="payment_midtrans_enabled" id="payment_midtrans_enabled_input" value="{{ filter_var(\App\Models\AppInformation::getValue('payment_midtrans_enabled', '1'), FILTER_VALIDATE_BOOLEAN) ? '1' : '0' }}">
+                                    <button type="button" data-value="1" class="payment-midtrans-toggle-btn px-4 py-2 rounded-xl text-[11px] font-black border transition-all {{ filter_var(\App\Models\AppInformation::getValue('payment_midtrans_enabled', '1'), FILTER_VALIDATE_BOOLEAN) ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300' }}">
+                                        Aktifkan
+                                    </button>
+                                    <button type="button" data-value="0" class="payment-midtrans-toggle-btn px-4 py-2 rounded-xl text-[11px] font-black border transition-all {{ !filter_var(\App\Models\AppInformation::getValue('payment_midtrans_enabled', '1'), FILTER_VALIDATE_BOOLEAN) ? 'bg-rose-500 text-white border-rose-500 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-rose-300' }}">
+                                        Nonaktifkan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- WhatsApp -->
                     <div>
                         <label class="block text-[11px] font-bold text-slate-700 mb-2 uppercase tracking-wide">WhatsApp Admin</label>
@@ -274,6 +328,39 @@
                             <input type="url" name="youtube_link" value="{{ \App\Models\AppInformation::getValue('youtube_link') }}" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-bold text-slate-800 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 outline-none transition-all shadow-sm" placeholder="https://youtube.com/...">
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SECTION 5: SLIDER / CAROUSEL BERANDA -->
+            <!-- ========================================== -->
+            <div>
+                <h3 class="text-[14px] font-black text-slate-800 border-b border-slate-100 pb-3 mb-5 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-hanania-purple/10 text-hanania-purple flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[18px]">view_carousel</span>
+                    </div>
+                    Gambar Slider Beranda (Max 3MB)
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @for($i = 1; $i <= 5; $i++)
+                        <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+                            <label class="block text-[11px] font-bold text-slate-700 mb-3 uppercase tracking-wide">Slide {{ $i }}</label>
+                            
+                            <!-- Preview Kotak Logo -->
+                            <div class="w-full h-32 bg-white border border-slate-200 rounded-xl flex items-center justify-center overflow-hidden shrink-0 shadow-sm relative mb-3">
+                                @php $slidePath = \App\Models\AppInformation::getValue('carousel_image_' . $i); @endphp
+                                @if($slidePath)
+                                    <img src="{{ asset('storage/' . $slidePath) }}" class="w-full h-full object-cover">
+                                @else
+                                    <span class="material-symbols-outlined text-slate-300 text-[32px]">image</span>
+                                @endif
+                            </div>
+                            
+                            <!-- Input File -->
+                            <input type="file" name="carousel_image_{{ $i }}" accept="image/png, image/jpeg, image/webp" class="w-full text-[12px] text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-hanania-purple/10 file:text-hanania-purple hover:file:bg-hanania-purple hover:file:text-white cursor-pointer transition-all">
+                        </div>
+                    @endfor
                 </div>
             </div>
 

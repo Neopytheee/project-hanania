@@ -65,7 +65,7 @@
                 </span>
 
                 <span class="hidden sm:block truncate max-w-[120px]">
-                    {{ auth()->user()->name ?? 'Administrator' }}
+                    Admin Hanania
                 </span>
 
             </div>
@@ -137,7 +137,7 @@
         
     </div>
 
-    <!-- ========================================== -->
+    <!-- ========================================== --> 
     <!-- SCRIPT LOGIKA RESPONSIVE SIDEBAR -->
     <!-- ========================================== -->
     <script>
@@ -162,5 +162,6 @@
     </script>
 
     <x-chat-widget />
+    @yield('scripts')
 </body>
 </html>

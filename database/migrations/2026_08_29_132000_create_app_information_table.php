@@ -6,25 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
-{
-    Schema::create('app_informations', function (Blueprint $table) {
-        $table->id();
-        $table->string('key')->unique();
-        $table->text('value')->nullable();
-        $table->string('type')->default('string'); 
-        $table->timestamps();
-    });
-}
+    {
+        Schema::create('app_informations', function (Blueprint $table) {
+            $table->id();
+            $table->string('key')->unique();
+            $table->text('value')->nullable();
+            $table->string('type')->default('string');
+            $table->timestamps();
+        });
+    }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('app_information');
+        // 🔒 PERBAIKAN: Menambahkan 's' agar persis dengan nama di fungsi up()
+        Schema::dropIfExists('app_informations');
     }
 };

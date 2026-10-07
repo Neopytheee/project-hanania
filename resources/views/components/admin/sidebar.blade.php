@@ -28,7 +28,7 @@
         <!-- ========================================== -->
         <!-- AREA ADMIN OPERASIONAL & SUPER ADMIN -->
         <!-- ========================================== -->
-        @hasanyrole('Super Admin|Admin Operasional')
+        @hasanyrole('Super Admin|Admin Gm|Admin Operasional')
         
         <!-- 2. OPERASIONAL JAMAAH -->
         <div>
@@ -70,13 +70,19 @@
             </a>
         </div>
 
-        <!-- 4. GALERI -->
+        <!-- 4. GALERI & ARTIKEL -->
         <div>
-            <p class="px-4 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Media</p>
+            <p class="px-4 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Media & Edukasi</p>
             
             <a href="{{ route('admin.galleries.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all group {{ request()->routeIs('admin.galleries.*') ? 'bg-hanania-purple/10 text-hanania-purple font-bold' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}">
                 <span class="material-symbols-outlined {{ request()->routeIs('admin.galleries.*') ? '[font-variation-settings:\'FILL\'_1]' : 'group-hover:scale-110 transition-transform' }}">image</span>
                 <span class="text-[13px]">Galeri Kenangan</span>
+            </a>
+
+            <!-- 🌟 MENU ARTIKEL BARU -->
+            <a href="{{ route('admin.articles.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all group {{ request()->routeIs('admin.articles.*') ? 'bg-hanania-purple/10 text-hanania-purple font-bold' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}">
+                <span class="material-symbols-outlined {{ request()->routeIs('admin.articles.*') ? '[font-variation-settings:\'FILL\'_1]' : 'group-hover:scale-110 transition-transform' }}">article</span>
+                <span class="text-[13px]">Kelola Artikel</span>
             </a>
         </div>
         
@@ -86,7 +92,7 @@
         <!-- ========================================== -->
         <!-- AREA ADMIN KEUANGAN & SUPER ADMIN -->
         <!-- ========================================== -->
-        @hasanyrole('Super Admin|Admin Keuangan')
+        @hasanyrole('Super Admin|Admin Gm|Admin Keuangan')
         
         <!-- 5. LAPORAN & KEUANGAN -->
         <div>

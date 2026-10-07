@@ -43,7 +43,7 @@
             <h3 class="text-[15px] font-black text-slate-800 border-b border-slate-100 pb-3 mb-5 flex items-center gap-2">
                 <span class="material-symbols-outlined text-hanania-purple text-[20px]">person_add</span> Tambah Staff Baru
             </h3>
-            <form action="{{ route('admin.management.store') }}" method="POST" class="space-y-4">
+            <form action="{{ route('admin.management.store') }}" method="POST" class="space-y-5">
                 @csrf
                 
                 <div>
@@ -75,23 +75,48 @@
                             <span class="material-symbols-outlined text-[18px]">expand_more</span>
                         </div>
                     </div>
+
+                    <!-- BOX INFORMASI HAK AKSES -->
+                    <div class="mt-4 bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm">
+                        <h4 class="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+                            <span class="material-symbols-outlined text-[16px] text-hanania-purple">info</span> Panduan Hak Akses
+                        </h4>
+                        <ul class="space-y-3 text-[12px] leading-relaxed text-slate-600">
+                            <li class="flex items-start gap-2">
+                                <span class="material-symbols-outlined text-[16px] text-emerald-500 mt-0.5 shrink-0">shield_person</span>
+                                <div><span class="font-bold text-slate-800">GM (General Manager)</span><br> Akses penuh ke semua fitur sistem, <span class="text-rose-500 font-medium">kecuali Manajemen Karyawan.</span></div>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="material-symbols-outlined text-[16px] text-amber-500 mt-0.5 shrink-0">account_balance_wallet</span>
+                                <div><span class="font-bold text-slate-800">Keuangan</span><br> Hanya mengelola menu yang berhubungan dengan aliran dana, tagihan, dan laporan keuangan.</div>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="material-symbols-outlined text-[16px] text-blue-500 mt-0.5 shrink-0">folder_shared</span>
+                                <div><span class="font-bold text-slate-800">Operasional</span><br> Fokus mengurus data pendaftar dan kelengkapan dokumen <span class="text-rose-500 font-medium">(tanpa akses ke data keuangan)</span>.</div>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
 
                 <button type="submit" class="w-full bg-hanania-purple hover:bg-hanania-purple-dark text-white font-bold py-3.5 rounded-xl text-[13px] flex justify-center items-center gap-2 transition-all shadow-md mt-2">
                     <span class="material-symbols-outlined text-[20px]">add_circle</span> Daftarkan Staff
                 </button>
-                                    <label class="block text-[11px] font-bold text-slate-700 mb-2 text-center uppercase tracking-wide">Password Default (hanania123) <span class="text-rose-500">*</span></label>
             </form>
         </div>
 
         <!-- ========================================== -->
         <!-- KOLOM KANAN: DAFTAR STAFF & ADMIN -->
         <!-- ========================================== -->
-        <div class="lg:col-span-2">
-            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="overflow-x-auto no-scrollbar">
+        <div class="lg:col-span-2 h-fit lg:sticky lg:top-24">
+            <!-- Tambahkan max-h dan flex-col agar isi tabel bisa di-scroll mandiri -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col max-h-[calc(100vh-120px)]">
+                
+                <!-- Tambahkan overflow-y-auto untuk scroll vertikal -->
+                <div class="overflow-x-auto overflow-y-auto custom-scrollbar relative">
                     <table class="w-full text-left text-[13px]">
-                        <thead class="bg-slate-50 border-b border-slate-200 text-[11px] uppercase tracking-wider text-slate-500 font-extrabold">
+                        
+                        <!-- Tambahkan sticky top-0 dan z-10 agar header tabel tidak ikut tergulung -->
+                        <thead class="bg-slate-50/95 backdrop-blur-sm border-b border-slate-200 text-[11px] uppercase tracking-wider text-slate-500 font-extrabold sticky top-0 z-10 shadow-sm">
                             <tr>
                                 <th class="py-4 px-6">Akun Staff</th>
                                 <th class="py-4 px-6">Jabatan Saat Ini</th>
@@ -99,6 +124,7 @@
                                 <th class="py-4 px-6 text-right">Aksi</th>
                             </tr>
                         </thead>
+                        
                         <tbody class="divide-y divide-slate-100">
                             @forelse($admins as $admin)
                                 <tr class="hover:bg-slate-50/50 transition-colors {{ $admin->status !== 'active' ? 'opacity-60 bg-slate-50' : '' }}">
@@ -162,16 +188,15 @@
                                     <td class="py-4 px-6 text-right">
                                         @if(auth()->id() !== $admin->id && $admin->status === 'active')
                                         <div class="flex items-center justify-end gap-2">
-                                            
                                             <!-- Tombol Reset Password VIP -->
-                                            <form action="{{ route('admin.management.reset_password', $admin->id) }}" method="POST" onsubmit="return confirm('Yakin ingin mereset password akun ini menjadi: hanania123 ?');">
+                                            <form action="{{ route('admin.management.reset_password', $admin->id) }}" method="POST" onsubmit="return confirm('Kirim tautan reset password ke email admin ini?');">
                                                 @csrf
-                                                <button type="submit" class="inline-flex items-center justify-center bg-white border border-amber-200 hover:bg-amber-50 text-amber-500 hover:text-amber-600 px-3 py-2 rounded-xl transition-all shadow-sm group" title="Reset Password (hanania123)">
+                                                <button type="submit" class="inline-flex items-center justify-center bg-white border border-amber-200 hover:bg-amber-50 text-amber-500 hover:text-amber-600 px-3 py-2 rounded-xl transition-all shadow-sm group" title="Kirim tautan reset password">
                                                     <span class="material-symbols-outlined text-[16px] group-hover:rotate-180 transition-transform duration-500">lock_reset</span>
                                                 </button>
                                             </form>
 
-                                            <!-- Tombol Cabut Akses (Yang sudah ada) -->
+                                            <!-- Tombol Cabut Akses -->
                                             <form action="{{ route('admin.management.destroy', $admin->id) }}" method="POST" onsubmit="return confirm('YAKIN INGIN MENCABUT AKSES STAFF INI?');">
                                                 @csrf
                                                 @method('DELETE')

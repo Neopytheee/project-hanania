@@ -2,6 +2,12 @@
 
 @section('title', 'Proses Pembayaran')
 
+@php
+    $creditedAmount = (float) ($transaction->net_amount ?? $transaction->amount ?? 0);
+    $feeAmount = (float) ($transaction->fee_amount ?? 0);
+    $totalCharged = $creditedAmount + $feeAmount;
+@endphp
+
 @section('content')
     <!-- 🪄 SINKRONISASI: Diletakkan presisi di TENGAH layar -->
     <div class="flex flex-col items-center justify-center min-h-[75vh] w-full px-4 animate-fade-in-up">
@@ -15,7 +21,14 @@
             </div>
 
             <h2 class="text-gray-500 text-[11px] font-extrabold uppercase tracking-widest mb-1.5">Tagihan Berhasil Dibuat</h2>
-            <p class="text-[34px] font-black text-hanania-purple mb-6 drop-shadow-sm">Rp {{ number_format($transaction->amount, 0, ',', '.') }}</p>
+            <p class="text-[34px] font-black text-hanania-purple mb-2 drop-shadow-sm">Rp {{ number_format($totalCharged, 0, ',', '.') }}</p>
+            <p class="text-[11px] text-gray-500 mb-6">
+                Setoran masuk ke saldo: <strong class="text-hanania-purple">Rp {{ number_format($creditedAmount, 0, ',', '.') }}</strong>
+                @if($feeAmount > 0)
+                    <span class="mx-1">•</span>
+                    Fee Midtrans: <strong class="text-amber-600">Rp {{ number_format($feeAmount, 0, ',', '.') }}</strong>
+                @endif
+            </p>
             
             <!-- Security Trust Badge -->
             <div class="bg-surface-container-high p-4 rounded-xl border border-outline-variant/50 flex items-start gap-3 mb-6 text-left">
@@ -37,9 +50,7 @@
         
     </div>
 
-    <!-- Script Midtrans Snap (Pastikan Client Key di .env sudah benar) -->
-    <!-- Jika di Production, ganti "sandbox" menjadi "production" di URL ini -->
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+    <script src="{{ config('services.midtrans.snap_url') }}" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
     
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function() {

@@ -53,7 +53,7 @@
 
                 <!-- Nama Rombongan -->
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-700 mb-2 uppercase tracking-wide">Nama / Keterangan <span class="text-rose-500">*</span></label>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-2 uppercase tracking-wide">Nama Grup = Nama Paket <span class="text-rose-500">*</span></label>
                     <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-hanania-purple transition-colors">
                             <span class="material-symbols-outlined text-[18px]">diversity_3</span>

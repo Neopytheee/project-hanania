@@ -12,9 +12,12 @@ class TravelPackage extends Model
 
     protected $fillable = [
         'code',
+        'category', // Wajib ada untuk penentuan kode HJI/UMR di Service
         'name',
         'description',
         'facilities',
+        'airline',      // Ditambahkan untuk detail Quick Facts
+        'hotel_mekkah', // Ditambahkan untuk detail Quick Facts
         'image',
         'estimated_price',
         'duration_days',

@@ -7,9 +7,9 @@ use App\Models\PaymentPlan;
 use App\Models\PaymentTransaction;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Midtrans\Config;
 use Midtrans\Snap;
-use Illuminate\Support\Str;
 
 class PaymentService
 {
@@ -18,12 +18,12 @@ class PaymentService
      */
     public function getNextPaymentRules(Enrollment $enrollment): array
     {
-        if (!$enrollment->paymentPlan) {
+        if (! $enrollment->paymentPlan) {
             return [
                 'is_first_payment' => true,
-                'min_amount'       => 1000000,
-                'payment_type'     => 'initial_deposit',
-                'label_saran'      => 'Wajib Setoran Awal Min. Rp 1.000.000'
+                'min_amount' => 1000000,
+                'payment_type' => 'initial_deposit',
+                'label_saran' => 'Wajib Setoran Awal Min. Rp 1.000.000',
             ];
         }
 
@@ -34,14 +34,34 @@ class PaymentService
             ->exists();
 
         return [
-            'is_first_payment' => !$hasVerifiedInitialDeposit,
-            'min_amount'       => $hasVerifiedInitialDeposit ? 500000 : 1000000,
-            'payment_type'     => $hasVerifiedInitialDeposit ? 'additional_payment' : 'initial_deposit',
-            'label_saran'      => $hasVerifiedInitialDeposit ? 'Min. Rp 500.000' : 'Wajib Setoran Awal Min. Rp 1.000.000'
+            'is_first_payment' => ! $hasVerifiedInitialDeposit,
+            'min_amount' => $hasVerifiedInitialDeposit ? 500000 : 1000000,
+            'payment_type' => $hasVerifiedInitialDeposit ? 'additional_payment' : 'initial_deposit',
+            'label_saran' => $hasVerifiedInitialDeposit ? 'Min. Rp 500.000' : 'Wajib Setoran Awal Min. Rp 1.000.000',
         ];
     }
 
-   /**
+    public function calculateMidtransFee(float $amount, ?string $midtransChannel = null): array
+    {
+        $feeRate = (float) config('services.midtrans.default_fee_rate', 0.008);
+
+        if ($feeRate <= 0) {
+            $feeRate = 0.008;
+        }
+
+        $feeAmount = round((float) $amount * $feeRate, 2);
+        $netAmount = round((float) $amount, 2);
+        $grossAmount = round((float) $amount + $feeAmount, 2);
+
+        return [
+            'fee_rate' => $feeRate,
+            'fee_amount' => $feeAmount,
+            'net_amount' => $netAmount,
+            'gross_amount' => $grossAmount,
+        ];
+    }
+
+    /**
      * Membuat transaksi pembayaran & Request Token Midtrans
      */
     public function createPayment(
@@ -50,15 +70,14 @@ class PaymentService
         string $type,
         string $paymentMethod = 'manual_transfer',
         ?string $referenceNumber = null,
-        ?string $proofFile = null
+        ?string $proofFile = null,
+        ?string $midtransChannel = null
     ): PaymentTransaction {
-        // 🛡️ Bungkus dengan Database Transaction & Row Locking untuk mencegah Race Condition
-        return DB::transaction(function () use ($enrollment, $amount, $type, $paymentMethod, $referenceNumber, $proofFile) {
-            
-            // Kunci baris payment_plan agar aman dari double-submission bersamaan
+        return DB::transaction(function () use ($enrollment, $amount, $type, $paymentMethod, $referenceNumber, $proofFile, $midtransChannel) {
+
             $paymentPlan = $enrollment->paymentPlan()->lockForUpdate()->first();
 
-            if (!$paymentPlan) {
+            if (! $paymentPlan) {
                 throw new \RuntimeException('Payment plan tidak ditemukan.');
             }
 
@@ -66,17 +85,14 @@ class PaymentService
                 throw new \InvalidArgumentException('Nominal pembayaran harus lebih dari Rp0.');
             }
 
-            // ==========================================
-            // 🛡️ VALIDASI MINIMAL DEPOSIT & SETORAN
-            // ==========================================
             $rules = $this->getNextPaymentRules($enrollment);
-            
+
             if ($amount < $rules['min_amount']) {
-                $formatRupiah = 'Rp ' . number_format($rules['min_amount'], 0, ',', '.');
-                $pesanError = $rules['is_first_payment'] 
+                $formatRupiah = 'Rp '.number_format($rules['min_amount'], 0, ',', '.');
+                $pesanError = $rules['is_first_payment']
                     ? "Pembayaran ditolak! Setoran awal (DP) wajib minimal {$formatRupiah}."
                     : "Nominal kurang! Setoran tabungan lanjutan minimal adalah {$formatRupiah}.";
-                    
+
                 throw new \InvalidArgumentException($pesanError);
             }
 
@@ -97,52 +113,68 @@ class PaymentService
                     ->where('status', 'verified')
                     ->exists();
 
-                if (!$hasVerifiedInitial) {
+                if (! $hasVerifiedInitial) {
                     throw new \RuntimeException('Pembayaran ditolak! Anda wajib melunasi Setoran Awal terlebih dahulu.');
                 }
             }
 
-            // 1. Buat Data Transaksi di Database
+            $feeDetails = [
+                'fee_rate' => 0.0,
+                'fee_amount' => 0.0,
+                'net_amount' => (float) $amount,
+                'gross_amount' => (float) $amount,
+            ];
+
+            if ($paymentMethod === 'midtrans') {
+                $feeDetails = $this->calculateMidtransFee($amount, $midtransChannel);
+            }
+
             $transaction = PaymentTransaction::create([
-                'payment_plan_id'    => $paymentPlan->id,
+                'payment_plan_id' => $paymentPlan->id,
                 'transaction_number' => $this->generateTransactionNumber(),
-                'type'               => $type,
-                'amount'             => $amount,
-                'payment_method'     => $paymentMethod,
-                'reference_number'   => $referenceNumber,
-                'proof_file'         => $proofFile,
-                'status'             => 'pending',
+                'type' => $type,
+                'amount' => (float) $amount,
+                'payment_method' => $paymentMethod,
+                'midtrans_channel' => $paymentMethod === 'midtrans' ? strtolower(trim((string) ($midtransChannel ?? 'bank_transfer'))) : null,
+                'fee_amount' => $feeDetails['fee_amount'],
+                'fee_rate' => $feeDetails['fee_rate'],
+                'net_amount' => $feeDetails['net_amount'],
+                'reference_number' => $referenceNumber,
+                'proof_file' => $proofFile,
+                'status' => 'pending',
             ]);
 
-            // 2. JIKA METODE MIDTRANS
             if ($paymentMethod === 'midtrans') {
-                Config::$serverKey = env('MIDTRANS_SERVER_KEY');
-                Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
+                Config::$serverKey = config('services.midtrans.server_key');
+                Config::$isProduction = config('services.midtrans.is_production', false);
                 Config::$isSanitized = true;
                 Config::$is3ds = true;
 
-                $urlNgrokAktif = 'https://baton-drizzle-tameness.ngrok-free.dev'; 
-                $notificationUrl = $urlNgrokAktif . '/api/midtrans/notification';
-                
+                // Each website can override the shared Midtrans account's webhook URL.
+                $notificationUrl = config('services.midtrans.notification_url')
+                    ?: route('api.midtrans.notification');
+
                 Config::$curlOptions = [
                     CURLOPT_HTTPHEADER => [
-                        'X-Override-Notification: ' . $notificationUrl
-                    ]
+                        'X-Override-Notification: '.$notificationUrl,
+                    ],
                 ];
-                
+
+                $grossAmount = (int) round((float) ($transaction->net_amount + $transaction->fee_amount), 0);
+
                 $params = [
                     'transaction_details' => [
-                        'order_id'     => $transaction->transaction_number, 
-                        'gross_amount' => (int) $transaction->amount,
+                        'order_id' => $transaction->transaction_number,
+                        'gross_amount' => $grossAmount,
                     ],
                     'customer_details' => [
                         'first_name' => $enrollment->customer->name ?? 'Jamaah',
-                        'phone'      => $enrollment->customer->phone ?? '08123456789',
-                        'email'      => $enrollment->customer->email ?? 'jamaah@hananiatravel.com', 
+                        'phone' => $enrollment->customer->phone,
+                        'email' => $enrollment->customer->email,
                     ],
                     'expiry' => [
-                        'unit'     => 'minute',
-                        'duration' => 5,
+                        'unit' => config('services.midtrans.expiry_unit'),
+                        'duration' => config('services.midtrans.expiry_duration'),
                     ],
                 ];
 
@@ -154,28 +186,32 @@ class PaymentService
             return $transaction;
         });
     }
-    
+
     /**
      * Admin melakukan verifikasi pembayaran.
      */
     public function verifyPayment(PaymentTransaction $transaction, User $admin): PaymentTransaction
     {
         return DB::transaction(function () use ($transaction, $admin) {
-            if ($transaction->status !== 'pending') {
+
+            // 🔒 ROW LOCK: Gunakan $lockedTx untuk SEMUA pengecekan dan update
+            $lockedTx = PaymentTransaction::where('id', $transaction->id)->lockForUpdate()->first();
+
+            if ($lockedTx->status !== 'pending') {
                 throw new \RuntimeException('Pembayaran tidak berada dalam status pending.');
             }
 
-            $transaction->update([
-                'status'      => 'verified',
-                'paid_at'     => $transaction->paid_at ?? now(),
+            $lockedTx->update([
+                'status' => 'verified',
+                'paid_at' => $lockedTx->paid_at ?? now(),
                 'verified_at' => now(),
                 'verified_by' => $admin->id,
             ]);
 
             // Pemicu otomatis pembaruan status enrollment
-            $this->refreshEnrollmentStatus($transaction->paymentPlan->enrollment);
+            $this->refreshEnrollmentStatus($lockedTx->paymentPlan->enrollment);
 
-            return $transaction->fresh(['paymentPlan']);
+            return $lockedTx->fresh(['paymentPlan']);
         });
     }
 
@@ -184,44 +220,60 @@ class PaymentService
      */
     public function rejectPayment(PaymentTransaction $transaction, User $admin, string $reason): PaymentTransaction
     {
-        if ($transaction->status !== 'pending') {
-            throw new \RuntimeException('Pembayaran tidak berada dalam status pending.');
-        }
+        // 🔒 ROW LOCK: Harus dibungkus di dalam DB::transaction agar tidak error
+        return DB::transaction(function () use ($transaction, $admin, $reason) {
 
-        if (trim($reason) === '') {
-            throw new \InvalidArgumentException('Alasan penolakan wajib diisi.');
-        }
+            $lockedTx = PaymentTransaction::where('id', $transaction->id)->lockForUpdate()->first();
 
-        $transaction->update([
-            'status'           => 'rejected',
-            'verified_by'      => $admin->id,
-            'verified_at'      => now(),
-            'rejection_reason' => $reason,
-        ]);
+            if ($lockedTx->status !== 'pending') {
+                throw new \RuntimeException('Pembayaran tidak berada dalam status pending.');
+            }
 
-        return $transaction->fresh();
+            if (trim($reason) === '') {
+                throw new \InvalidArgumentException('Alasan penolakan wajib diisi.');
+            }
+
+            $lockedTx->update([
+                'status' => 'rejected',
+                'verified_by' => $admin->id,
+                'verified_at' => now(),
+                'rejection_reason' => $reason,
+            ]);
+
+            return $lockedTx->fresh();
+        });
     }
 
     public function verifiedTotal(PaymentPlan $paymentPlan): float
     {
-        return (float) $paymentPlan->transactions()->where('status', 'verified')->sum('amount');
+        return (float) $paymentPlan->transactions()
+            ->where('status', 'verified')
+            ->sum(DB::raw('COALESCE(net_amount, amount)'));
     }
 
     public function enrollmentPaidTotal(Enrollment $enrollment): float
     {
-        if (!$enrollment->paymentPlan) return 0;
+        if (! $enrollment->paymentPlan) {
+            return 0;
+        }
+
         return $this->verifiedTotal($enrollment->paymentPlan);
     }
 
     public function outstandingAmount(Enrollment $enrollment): float
     {
         $paymentPlan = $enrollment->paymentPlan;
-        if (!$paymentPlan) return 0;
+        if (! $paymentPlan) {
+            return 0;
+        }
 
         $target = $paymentPlan->final_target_amount ?? $paymentPlan->estimated_target_amount;
-        if ($target === null) return 0;
+        if ($target === null) {
+            return 0;
+        }
 
         $paid = $this->verifiedTotal($paymentPlan);
+
         return max((float) $target - $paid, 0);
     }
 
@@ -231,7 +283,9 @@ class PaymentService
     public function refreshEnrollmentStatus(Enrollment $enrollment): Enrollment
     {
         $paymentPlan = $enrollment->paymentPlan;
-        if (!$paymentPlan) return $enrollment;
+        if (! $paymentPlan) {
+            return $enrollment;
+        }
 
         $totalPaid = $this->verifiedTotal($paymentPlan);
         $target = $paymentPlan->final_target_amount ?? $paymentPlan->estimated_target_amount;
@@ -270,8 +324,8 @@ class PaymentService
         do {
             $date = now()->format('ymd');
             $random = random_int(1000, 9999);
-            
-            $number = 'PUH-' . $date . '-' . $random;
+
+            $number = 'PUH-'.$date.'-'.$random;
         } while (PaymentTransaction::where('transaction_number', $number)->exists());
 
         return $number;
@@ -283,34 +337,55 @@ class PaymentService
     public function handleMidtransWebhook(array $payload): void
     {
         $orderId = $payload['order_id'] ?? null;
-        $status  = $payload['transaction_status'] ?? null;
-        $fraud   = $payload['fraud_status'] ?? null;
+        $status = $payload['transaction_status'] ?? null;
+        $fraud = $payload['fraud_status'] ?? null;
+        $grossAmount = $payload['gross_amount'] ?? null;
 
-        if (!$orderId) {
+        if (! $orderId) {
             throw new \InvalidArgumentException('No order ID provided');
         }
 
-        $transaction = \App\Models\PaymentTransaction::where('transaction_number', $orderId)->first();
+        // 🔒 PERBAIKAN: Bungkus SELURUH proses webhook ke dalam DB Transaction & Lock
+        DB::transaction(function () use ($orderId, $status, $fraud, $grossAmount) {
 
-        if (!$transaction) {
-            throw new \RuntimeException('Transaction not found');
-        }
+            // 🔒 ROW LOCK: Kunci transaksi agar tidak dieksekusi ganda oleh retry webhook
+            $transaction = PaymentTransaction::where('transaction_number', $orderId)
+                ->lockForUpdate()
+                ->first();
 
-        // Jika sudah diproses, abaikan
-        if (in_array($transaction->status, ['verified', 'expired', 'rejected'])) {
-            return;
-        }
+            if (! $transaction) {
+                throw new \RuntimeException('Transaction not found');
+            }
 
-        DB::transaction(function () use ($transaction, $status, $fraud) {
+            // 🔒 PRESISI DECIMAL ABSOLUT (Mencegah floating-point bypass)
+            if ($grossAmount !== null) {
+                $expectedGrossAmount = bcadd((string) $transaction->net_amount, (string) $transaction->fee_amount, 2);
+
+                if (bccomp($expectedGrossAmount, (string) $grossAmount, 2) !== 0) {
+                    Log::critical('⚠️ UPAYA MANIPULASI NOMINAL', [
+                        'order_id' => $orderId,
+                        'db' => $transaction->net_amount,
+                        'fee' => $transaction->fee_amount,
+                        'midtrans' => $grossAmount,
+                    ]);
+                    throw new \InvalidArgumentException('Pembayaran ditolak: Nominal tidak sesuai.');
+                }
+            }
+
+            // Jika sudah diproses, hentikan tanpa error
+            if (in_array($transaction->status, ['verified', 'expired', 'rejected'])) {
+                return;
+            }
+
             if ($status == 'capture') {
                 if ($fraud == 'challenge') {
                     $transaction->update(['status' => 'pending']);
-                } else if ($fraud == 'accept') {
+                } elseif ($fraud == 'accept') {
                     $this->markAsVerified($transaction);
                 }
-            } else if ($status == 'settlement') {
+            } elseif ($status == 'settlement') {
                 $this->markAsVerified($transaction);
-            } else if (in_array($status, ['deny', 'expire', 'cancel'])) {
+            } elseif (in_array($status, ['deny', 'expire', 'cancel'])) {
                 $transaction->update(['status' => 'expired']);
             }
         });
@@ -319,11 +394,11 @@ class PaymentService
     /**
      * Memverifikasi transaksi dan mengirim WA
      */
-    protected function markAsVerified(\App\Models\PaymentTransaction $transaction): void
+    protected function markAsVerified(PaymentTransaction $transaction): void
     {
         $transaction->update([
-            'status'      => 'verified',
-            'paid_at'     => now(),
+            'status' => 'verified',
+            'paid_at' => now(),
             'verified_at' => now(),
         ]);
 
@@ -334,31 +409,31 @@ class PaymentService
         try {
             $enrollment = $transaction->paymentPlan->enrollment ?? null;
             $jamaah = $enrollment ? ($enrollment->user ?? $enrollment->customer) : null;
-            
+
             $phone = null;
-            $nama  = 'Jamaah';
+            $nama = 'Jamaah';
 
             if ($jamaah) {
                 $nama = $jamaah->name ?? $jamaah->nama ?? 'Jamaah';
                 $phone = $jamaah->phone ?? $jamaah->phone_number ?? null;
-                
-                if (!$phone && isset($jamaah->customer)) {
+
+                if (! $phone && isset($jamaah->customer)) {
                     $phone = $jamaah->customer->phone ?? $jamaah->customer->phone_number ?? null;
                 }
             }
 
             if ($phone) {
                 $nominal = number_format($transaction->amount, 0, ',', '.');
-                $pesan  = "Assalamu'alaikum Bpk/Ibu *{$nama}*,\n\n";
+                $pesan = "Assalamu'alaikum Bpk/Ibu *{$nama}*,\n\n";
                 $pesan .= "Alhamdulillah, setoran tabungan Umroh Anda sebesar *Rp {$nominal}* telah TERVERIFIKASI.\n\n";
-                $pesan .= "Terima kasih telah mempercayakan perjalanan ibadah Anda bersama Hanania. 🤲✨";
+                $pesan .= 'Terima kasih telah mempercayakan perjalanan ibadah Anda bersama Hanania. 🤲✨';
 
                 // \App\Services\WhatsAppService::sendMessage($phone, $pesan);
             } else {
-                \Illuminate\Support\Facades\Log::warning("Notif WA Batal: Gagal menemukan nomor HP untuk transaksi " . $transaction->transaction_number);
+                Log::warning('Notif WA Batal: Gagal menemukan nomor HP untuk transaksi '.$transaction->transaction_number);
             }
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Notif WA gagal: " . $e->getMessage());
+            Log::error('Notif WA gagal: '.$e->getMessage());
         }
     }
 }

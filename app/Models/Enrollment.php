@@ -5,8 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 
 class Enrollment extends Model
 {
@@ -108,7 +109,7 @@ class Enrollment extends Model
         return (float) (
             $this->paymentPlan?->transactions()
                 ->where('status', 'verified')
-                ->sum('amount') ?? 0
+                ->sum(DB::raw('COALESCE(net_amount, amount)')) ?? 0
         );
     }
 
@@ -135,22 +136,22 @@ class Enrollment extends Model
     public function statusText(): string
     {
         $statuses = [
-            'enrolled'         => 'Pendaftaran Berhasil',
-            'saving'           => 'Aktif Menabung',
-            'funds_sufficient' => 'Target Tercapai (Penyesuaian Jadwal)', // Lebih memotivasi
+            'enrolled' => 'Pendaftaran Berhasil',
+            'saving' => 'Aktif Menabung',
+            'funds_sufficient' => 'Target Tercapai (Penyesuaian Jadwal)',
             'waiting_schedule' => 'Menunggu Penempatan Kloter',
-            'scheduled'        => 'Tergabung di Kloter Keberangkatan',
-            'price_confirmed'  => 'Harga Telah Disetujui',
-            'payment_due'      => 'Menunggu Pelunasan', // Jauh lebih sopan daripada "Kurang Bayar"
-            'overdue'          => 'Batas Pelunasan Terlewat',
-            'fully_paid'       => 'Pembayaran Lunas',
-            'ready'            => 'Siap Berangkat',
-            'departed'         => 'Sedang di Tanah Suci',
-            'completed'        => 'Ibadah Selesai (Alhamdulillah)',
-            'cancelled'        => 'Pendaftaran Dibatalkan',
+            'scheduled' => 'Tergabung di Kloter Keberangkatan',
+            'price_confirmed' => 'Harga Telah Disetujui',
+            'payment_due' => 'Menunggu Pelunasan',
+            'overdue' => 'Batas Pelunasan Terlewat',
+            'fully_paid' => 'Pembayaran Lunas',
+            'ready' => 'Siap Berangkat',
+            'departed' => 'Sedang di Tanah Suci',
+            'completed' => 'Ibadah Selesai (Alhamdulillah)',
+            'cancelled' => 'Pendaftaran Dibatalkan',
         ];
 
-        // Jika status ada di array, tampilkan bahasa Indonesianya. 
+        // Jika status ada di array, tampilkan bahasa Indonesianya.
         // Jika tidak ada, fallback ke bawaan sistem.
         return $statuses[$this->status] ?? strtoupper(str_replace('_', ' ', $this->status));
     }

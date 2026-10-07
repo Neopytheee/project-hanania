@@ -56,26 +56,22 @@ class DocumentService
         return $document->fresh();
     }
 
-    public function isComplete(
-        Enrollment $enrollment
-    ): bool {
+    public function isComplete(Enrollment $enrollment): bool
+    {
+        // 🔒 PERBAIKAN LOGIKA: Sesuaikan nama tipe dokumen dengan ENUM di tabel database
         $requiredDocuments = [
             'ktp',
             'kk',
-            'passport',
+            'passport_biodata',      // Menggantikan 'passport'
+            'passport_endorsement',  // Menggantikan 'passport'
             'photo',
         ];
 
         return $enrollment
             ->documents()
-            ->whereIn(
-                'document_type',
-                $requiredDocuments
-            )
+            ->whereIn('document_type', $requiredDocuments)
             ->where('status', 'approved')
             ->distinct('document_type')
-            ->count('document_type') === count(
-                $requiredDocuments
-            );
+            ->count('document_type') === count($requiredDocuments);
     }
 }

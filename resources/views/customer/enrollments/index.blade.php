@@ -35,10 +35,10 @@
                     <h1 class="font-heading text-[30px] sm:text-[38px] font-black text-hanania-purple-dark tracking-tight mt-1">Tabungan Perjalanan</h1>
                     <p class="text-[13px] text-gray-500 mt-2 font-medium">Pantau setiap niat baik dan perjalanan Anda bersama {{ $shortCompanyName }}.</p>
                 </div>
-                <a href="{{ route('packages.index') }}" class="inline-flex items-center justify-center gap-2 bg-hanania-purple text-white px-5 py-3 rounded-xl text-[11px] font-black shadow-sm hover:bg-hanania-purple-dark transition-colors">
+                <!-- <a href="{{ route('packages.index') }}" class="inline-flex items-center justify-center gap-2 bg-hanania-purple text-white px-5 py-3 rounded-xl text-[11px] font-black shadow-sm hover:bg-hanania-purple-dark transition-colors">
                     <span class="material-symbols-outlined text-[17px]">add</span>
-                    Buka Rekening Baru
-                </a>
+                    Tambah Jama'ah Baru
+                </a> -->
             </div>
 
             @if(session('success'))
@@ -58,7 +58,7 @@
                         </div>
                         <p class="text-[9px] uppercase tracking-[.18em] font-black text-hanania-purple">Belum Ada Perjalanan</p>
                         <h2 class="font-heading text-[25px] font-black text-hanania-purple-dark mt-2">Mari mulai niat baik Anda</h2>
-                        <p class="text-[13px] text-gray-500 mt-2 leading-relaxed">Belum ada rekening tabungan atau pendaftaran paket. Pilih perjalanan yang paling sesuai dengan rencana Anda.</p>
+                        <p class="text-[13px] text-gray-500 mt-2 leading-relaxed">Belum ada tabungan atau pendaftaran paket. Pilih perjalanan yang paling sesuai dengan rencana Anda.</p>
                         <a href="{{ route('packages.index') }}" class="inline-flex items-center gap-2 mt-6 btn-hanania-gold px-6 py-3.5 rounded-xl text-[12px] font-black">
                             Lihat Paket Umroh <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
                         </a>
@@ -112,7 +112,7 @@
 
                     <div class="grid grid-cols-3 lg:grid-cols-1 gap-3">
                         <div class="bg-white border border-hanania-purple/10 rounded-2xl p-4 shadow-sm flex flex-col justify-center">
-                            <p class="text-[8px] uppercase tracking-[.16em] text-gray-400 font-black">Total Rekening</p>
+                            <p class="text-[8px] uppercase tracking-[.16em] text-gray-400 font-black">Total Tabungan</p>
                             <p class="font-heading text-[26px] font-black text-hanania-purple-dark mt-1">{{ $enrollments->count() }}</p>
                         </div>
                         <div class="bg-hanania-purple-light/35 border border-hanania-purple/10 rounded-2xl p-4 shadow-sm flex flex-col justify-center">
@@ -130,7 +130,7 @@
                 <section>
                     <div class="flex items-end justify-between gap-4 mb-4">
                         <div>
-                            <p class="text-[9px] uppercase tracking-[.18em] font-black text-hanania-purple">Semua Rekening</p>
+                            <p class="text-[9px] uppercase tracking-[.18em] font-black text-hanania-purple">Semua Tabungan</p>
                             <h2 class="font-heading text-[24px] sm:text-[28px] font-black text-hanania-purple-dark mt-1">Perjalanan Anda</h2>
                         </div>
                     </div>
@@ -178,12 +178,17 @@
                     </div>
                 </section>
 
-                <div class="mt-5 flex justify-center">
-                    <a href="{{ route('packages.index') }}" class="inline-flex items-center gap-2 text-[10px] uppercase tracking-[.15em] font-black text-hanania-purple hover:text-hanania-gold transition-colors">
-                        <span class="material-symbols-outlined text-[15px]">add</span>
-                        Tambah Rekening Baru
-                    </a>
+                <div class="mt-8 bg-hanania-purple-light/40 border border-hanania-purple/10 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+                <div class="text-center sm:text-left">
+                    <h4 class="font-heading text-sm font-black text-hanania-purple-dark">Ingin mendaftarkan kerabat atau teman?</h4>
+                    <p class="text-[12px] text-gray-500 mt-0.5">Dampingi perjalanan ibadah keluarga dan orang terdekat Anda bersama Hanania.</p>
                 </div>
+                
+                <a href="{{ route('packages.index') }}" class="inline-flex items-center justify-center gap-2 bg-hanania-purple hover:bg-hanania-purple-dark text-white px-5 py-3 rounded-xl text-[12px] font-black shadow-sm transition-all hover:scale-[1.02] active:scale-95 shrink-0">
+                    <span class="material-symbols-outlined text-[17px]">add</span>
+                    Tambah Jama'ah Baru
+                </a>
+            </div>
             @endif
         </div>
     </div>

@@ -40,10 +40,15 @@ return new class extends Migration
 
             // Dokumen dari Customer
             $table->string('supporting_document')->nullable();
-            
-            // Dokumen dari Admin (TAMBAHAN BARU)
+
+            // Dokumen dari Admin
             $table->string('admin_acc_document')->nullable();
             $table->string('admin_transfer_proof')->nullable();
+
+            /*
+             * 🔒 TAMBAHAN BARU: Nominal yang direquest oleh jamaah (Tarik Dana Sebagian)
+             */
+            $table->decimal('requested_amount', 15, 2)->nullable();
 
             /*
              * Biaya pengunduran diri / administrasi.
@@ -52,7 +57,7 @@ return new class extends Migration
                 ->default(0);
 
             /*
-             * Jumlah yang benar-benar dikembalikan.
+             * Jumlah yang benar-benar dikembalikan (diisi oleh admin).
              */
             $table->decimal('refund_amount', 15, 2)
                 ->default(0);

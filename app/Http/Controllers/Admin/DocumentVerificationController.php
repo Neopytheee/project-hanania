@@ -5,13 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Document;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage; // 🪄 Tambahkan ini di atas
 
 class DocumentVerificationController extends Controller
 {
-    // Menampilkan daftar dokumen yang butuh direview (status: submitted)
     public function index()
     {
-        // Ambil dokumen yang baru diupload beserta data jamaah dan paketnya
         $pendingDocuments = Document::with(['enrollment.customer', 'enrollment.travelPackage'])
             ->where('status', 'submitted')
             ->orderBy('uploaded_at', 'desc')
@@ -20,7 +19,6 @@ class DocumentVerificationController extends Controller
         return view('admin.documents.index', compact('pendingDocuments'));
     }
 
-    // Menyetujui dokumen
     public function approve(Request $request, Document $document)
     {
         if ($document->status !== 'submitted') {
@@ -28,15 +26,14 @@ class DocumentVerificationController extends Controller
         }
 
         $document->update([
-            'status'      => 'approved',
+            'status' => 'approved',
             'reviewed_at' => now(),
             'reviewed_by' => $request->user()->id,
         ]);
 
-        return back()->with('success', 'Dokumen ' . strtoupper($document->document_type) . ' berhasil disetujui.');
+        return back()->with('success', 'Dokumen '.strtoupper($document->document_type).' berhasil disetujui.');
     }
 
-    // Menolak dokumen dengan alasan
     public function reject(Request $request, Document $document)
     {
         if ($document->status !== 'submitted') {
@@ -48,26 +45,26 @@ class DocumentVerificationController extends Controller
         ]);
 
         $document->update([
-            'status'           => 'rejected',
+            'status' => 'rejected',
             'rejection_reason' => $request->reason,
-            'reviewed_at'      => now(),
-            'reviewed_by'      => $request->user()->id,
+            'reviewed_at' => now(),
+            'reviewed_by' => $request->user()->id,
         ]);
 
-        return back()->with('success', 'Dokumen ' . strtoupper($document->document_type) . ' ditolak. Jamaah harus mengunggah ulang.');
+        return back()->with('success', 'Dokumen '.strtoupper($document->document_type).' ditolak. Jamaah harus mengunggah ulang.');
     }
 
-    // Fungsi untuk memaksa preview file di browser
+    // 🔒 PERBAIKAN: Fungsi untuk memaksa preview file dari disk Private (Local)
     public function preview($id)
     {
-        $document = \App\Models\Document::findOrFail($id);
-        $path = storage_path('app/public/' . $document->file_path);
+        $document = Document::findOrFail($id);
 
-        if (!file_exists($path)) {
+        // Cek keberadaan file di disk local (storage/app/...)
+        if (! Storage::disk('local')->exists($document->file_path)) {
             abort(404, 'File dokumen tidak ditemukan di server.');
         }
 
-        // response()->file() akan memaksa browser untuk melakukan PREVIEW, bukan download
-        return response()->file($path);
+        // Kembalikan file menggunakan absolute path dari disk local
+        return response()->file(Storage::disk('local')->path($document->file_path));
     }
 }

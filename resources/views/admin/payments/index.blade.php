@@ -84,9 +84,11 @@
                                 <p class="font-black text-[15px] text-emerald-600 mb-2 drop-shadow-sm">
                                     Rp {{ number_format($trx->amount, 0, ',', '.') }}
                                 </p>
-                                <a href="{{ asset('storage/' . $trx->proof_file) }}" target="_blank" class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-hanania-purple hover:text-white px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all border border-slate-200 w-max shadow-sm group/btn">
-                                    <span class="material-symbols-outlined text-[16px] group-hover/btn:scale-110 transition-transform">receipt_long</span> Cek Struk
-                                </a>
+                                @if($trx->proof_file)
+                                    <a href="{{ route('admin.payments.proof', $trx) }}" target="_blank" class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-hanania-purple hover:text-white px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all border border-slate-200 w-max shadow-sm group/btn">
+                                        <span class="material-symbols-outlined text-[16px] group-hover/btn:scale-110 transition-transform">receipt_long</span> Cek Struk
+                                    </a>
+                                @endif
                             </td>
                             
                             <!-- Aksi -->
@@ -94,15 +96,15 @@
                                 <div class="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-2">
                                     
                                     <!-- Tombol Sah (Approve) -->
-                                    <form action="{{ route('admin.payments.verify', $trx->id) }}" method="POST">
+                                    <form action="{{ route('admin.payments.verify', $trx->id) }}" method="POST" class="js-verify-payment" data-confirm-message="Sahkan setoran sebesar Rp {{ number_format($trx->amount, 0, ',', '.') }} dari {{ $passengerName }}?">
                                         @csrf
-                                        <button type="submit" onclick="return confirm('Sahkan setoran sebesar Rp {{ number_format($trx->amount, 0, ',', '.') }} dari {{ $passengerName }}?')" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-[12px] font-bold transition-all shadow-[0_4px_10px_rgba(16,185,129,0.3)] flex items-center justify-center gap-1.5">
+                                        <button type="submit" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-[12px] font-bold transition-all shadow-[0_4px_10px_rgba(16,185,129,0.3)] flex items-center justify-center gap-1.5">
                                             <span class="material-symbols-outlined text-[16px]">verified</span> Sahkan
                                         </button>
                                     </form>
 
                                     <!-- Tombol Tolak (Reject) memanggil Custom Modal -->
-                                    <button type="button" onclick="openRejectModal('{{ route('admin.payments.reject', $trx->id) }}', '{{ $passengerName }}', 'Rp {{ number_format($trx->amount, 0, ',', '.') }}')" class="w-full sm:w-auto bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 px-4 py-2 rounded-xl text-[12px] font-bold transition-all shadow-sm flex items-center justify-center gap-1.5">
+                                    <button type="button" class="js-reject-payment w-full sm:w-auto bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 px-4 py-2 rounded-xl text-[12px] font-bold transition-all shadow-sm flex items-center justify-center gap-1.5" data-action-url="{{ route('admin.payments.reject', $trx->id) }}" data-passenger-name="{{ $passengerName }}" data-amount="Rp {{ number_format($trx->amount, 0, ',', '.') }}">
                                         <span class="material-symbols-outlined text-[16px]">cancel</span> Tolak
                                     </button>
 
@@ -173,6 +175,24 @@
 
 <!-- Script Logika Modal -->
 <script>
+    document.querySelectorAll('.js-verify-payment').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            if (!window.confirm(form.dataset.confirmMessage)) {
+                event.preventDefault();
+            }
+        });
+    });
+
+    document.querySelectorAll('.js-reject-payment').forEach((button) => {
+        button.addEventListener('click', () => {
+            openRejectModal(
+                button.dataset.actionUrl,
+                button.dataset.passengerName,
+                button.dataset.amount,
+            );
+        });
+    });
+
     function openRejectModal(actionUrl, passengerName, nominal) {
         const modal = document.getElementById('rejectModal');
         const modalContent = document.getElementById('rejectModalContent');

@@ -107,7 +107,7 @@
                                     </a>
                                     
                                     <!-- Tombol Hapus (Icon Only) -->
-                                    <form action="{{ route('admin.travel_packages.destroy', $paket->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Peringatan: Yakin ingin menghapus paket {{ $paket->code }}?');">
+                                    <form action="{{ route('admin.travel_packages.destroy', $paket->id) }}" method="POST" class="js-delete-package inline-block" data-package-code="{{ $paket->code }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" 
@@ -146,4 +146,15 @@
         
     </div>
 </div>
+<script>
+    document.querySelectorAll('.js-delete-package').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            const packageCode = form.dataset.packageCode || 'ini';
+
+            if (!window.confirm(`Peringatan: Yakin ingin menghapus paket ${packageCode}?`)) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
 @endsection

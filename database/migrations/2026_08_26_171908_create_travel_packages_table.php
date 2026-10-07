@@ -14,13 +14,17 @@ return new class extends Migration
         Schema::create('travel_packages', function (Blueprint $table) {
             $table->id();
 
+            // Kolom penentu untuk Service membuat kode otomatis (UMR/HJI)
+            $table->enum('category', ['UMROH', 'HAJI'])->default('UMROH');
+
             $table->string('code', 50)->unique();
-
             $table->string('name');
-
             $table->text('description')->nullable();
-
             $table->text('facilities')->nullable();
+
+            // Kolom tambahan untuk Quick Facts di halaman Customer
+            $table->string('airline')->nullable();
+            $table->string('hotel_mekkah')->nullable();
 
             $table->string('image')->nullable();
 

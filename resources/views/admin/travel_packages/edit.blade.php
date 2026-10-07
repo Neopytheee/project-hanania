@@ -22,8 +22,26 @@
             @csrf
             @method('PUT')
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Kode Paket (Biasanya Statis/Edit Hati-hati) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Kategori Paket -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-2 uppercase tracking-wide">Kategori Jenis Paket <span class="text-rose-500">*</span></label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-hanania-purple transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">category</span>
+                        </div>
+                        <select name="category" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-bold text-slate-800 focus:bg-white focus:border-hanania-purple focus:ring-4 focus:ring-hanania-purple/10 outline-none transition-all appearance-none cursor-pointer" required>
+                            <option value="UMROH" {{ old('category', $travelPackage->category) == 'UMROH' ? 'selected' : '' }}>Umroh</option>
+                            <option value="HAJI" {{ old('category', $travelPackage->category) == 'HAJI' ? 'selected' : '' }}>Haji</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
+                            <span class="material-symbols-outlined text-[20px]">expand_more</span>
+                        </div>
+                    </div>
+                    @error('category') <p class="text-rose-500 text-[11px] mt-1 font-bold">{{ $message }}</p> @enderror
+                </div>
+
+                <!-- Kode Paket -->
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 mb-2 uppercase tracking-wide">Kode Paket <span class="text-rose-500">*</span></label>
                     <div class="relative group">
@@ -54,6 +72,32 @@
                 <label class="block text-[11px] font-bold text-slate-700 mb-2 uppercase tracking-wide">Nama Paket <span class="text-rose-500">*</span></label>
                 <input type="text" name="name" value="{{ old('name', $travelPackage->name) }}" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-bold text-slate-800 focus:bg-white focus:border-hanania-purple focus:ring-4 focus:ring-hanania-purple/10 outline-none transition-all" required>
                 @error('name') <p class="text-rose-500 text-[11px] mt-1 font-bold">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Maskapai -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-2 uppercase tracking-wide">Maskapai <span class="text-slate-400 normal-case">(Opsional)</span></label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-hanania-purple transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">airlines</span>
+                        </div>
+                        <input type="text" name="airline" value="{{ old('airline', $travelPackage->airline) }}" placeholder="Contoh: Saudia Airlines" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-bold text-slate-800 focus:bg-white focus:border-hanania-purple focus:ring-4 focus:ring-hanania-purple/10 outline-none transition-all">
+                    </div>
+                    @error('airline') <p class="text-rose-500 text-[11px] mt-1 font-bold">{{ $message }}</p> @enderror
+                </div>
+
+                <!-- Hotel Mekkah -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-2 uppercase tracking-wide">Hotel Mekkah <span class="text-slate-400 normal-case">(Opsional)</span></label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-hanania-purple transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">domain</span>
+                        </div>
+                        <input type="text" name="hotel_mekkah" value="{{ old('hotel_mekkah', $travelPackage->hotel_mekkah) }}" placeholder="Contoh: Pullman Zamzam" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-bold text-slate-800 focus:bg-white focus:border-hanania-purple focus:ring-4 focus:ring-hanania-purple/10 outline-none transition-all">
+                    </div>
+                    @error('hotel_mekkah') <p class="text-rose-500 text-[11px] mt-1 font-bold">{{ $message }}</p> @enderror
+                </div>
             </div>
 
             <!-- Harga Target -->
@@ -91,7 +135,7 @@
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 mb-2 uppercase tracking-wide">Foto / Brosur Paket</label>
                     
-                    <!-- PREVIEW GAMBAR LAMA (Desain Estetik) -->
+                    <!-- PREVIEW GAMBAR LAMA -->
                     @if($travelPackage->image)
                         <div class="mb-4 bg-slate-50 border border-slate-200 rounded-xl p-3 flex gap-4 items-center">
                             <div class="w-20 h-20 rounded-lg overflow-hidden shrink-0 border border-slate-200">

@@ -102,7 +102,7 @@
                                     @endif
 
                                     <!-- Tombol Hapus -->
-                                    <form action="{{ route('admin.testimonials.destroy', $testi->id) }}" method="POST" onsubmit="return confirm('Peringatan: Yakin ingin menghapus ulasan dari {{ $testi->user->name ?? 'Jamaah' }} secara permanen?');">
+                                    <form action="{{ route('admin.testimonials.destroy', $testi->id) }}" method="POST" class="js-delete-testimonial" data-author-name="{{ $testi->user->name ?? 'Jamaah' }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" 
@@ -134,4 +134,15 @@
         
     </div>
 </div>
+<script>
+    document.querySelectorAll('.js-delete-testimonial').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            const authorName = form.dataset.authorName || 'Jamaah';
+
+            if (!window.confirm(`Peringatan: Yakin ingin menghapus ulasan dari ${authorName} secara permanen?`)) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
 @endsection

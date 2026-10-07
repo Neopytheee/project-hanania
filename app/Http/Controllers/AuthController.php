@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\RegisterOtpMail;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
-use App\Services\AuthService;
-use App\Mail\RegisterOtpMail;
 
 class AuthController extends Controller
 {
@@ -21,7 +21,7 @@ class AuthController extends Controller
 
     public function showAdminLoginForm()
     {
-        return view('auth.admin-login'); 
+        return view('auth.admin-login');
     }
 
     public function showRegisterForm()
@@ -35,18 +35,19 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email'    => ['required', 'email'],
+            'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            
+
             if (Auth::user()->role === 'customer') {
                 return redirect()->route('customer.dashboard');
             }
-            
+
             Auth::logout();
+
             return back()->withErrors(['email' => 'Silakan gunakan halaman login khusus Admin.'])->onlyInput('email');
         }
 
@@ -59,18 +60,19 @@ class AuthController extends Controller
     public function adminLogin(Request $request)
     {
         $credentials = $request->validate([
-            'email'    => ['required', 'email'],
+            'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            
+
             if (Auth::user()->role === 'admin') {
                 return redirect()->route('admin.dashboard');
             }
-            
+
             Auth::logout();
+
             return back()->withErrors(['email' => 'Tidak ada akses.'])->onlyInput('email');
         }
 
@@ -83,19 +85,19 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'email'                   => 'required|email|unique:users,email',
-            'password'                => 'required|min:8',
-            'name'                    => 'required|string|max:255',
-            'nik'                     => 'required|string|size:16|unique:customers,nik',
-            'phone'                   => 'required|string|max:20',
-            'birth_date'              => 'required|date',
-            'gender'                  => 'required|in:male,female',
-            'address'                 => 'required|string',
-            'emergency_contact_name'  => 'required|string',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:8',
+            'name' => 'required|string|max:255',
+            'nik' => 'required|string|size:16',
+            'phone' => 'required|string|max:20',
+            'birth_date' => 'required|date',
+            'gender' => 'required|in:male,female',
+            'address' => 'required|string',
+            'emergency_contact_name' => 'required|string',
             'emergency_contact_phone' => 'required|string',
-            'bank_name'            => 'nullable|string|max:100',
-'bank_account_number'  => 'nullable|string|max:50',
-'bank_account_name'    => 'nullable|string|max:255',
+            'bank_name' => 'nullable|string|max:100',
+            'bank_account_number' => 'nullable|string|max:50',
+            'bank_account_name' => 'nullable|string|max:255',
         ]);
 
         // Generate OTP
@@ -103,12 +105,12 @@ class AuthController extends Controller
         $validated['otp'] = $otp;
 
         // Simpan ke Cache selama 10 Menit
-        Cache::put('register_otp_' . $request->email, $validated, now()->addMinutes(10));
+        Cache::put('register_otp_'.$request->email, $validated, now()->addMinutes(10));
 
-        Mail::to($request->email)->send(new \App\Mail\RegisterOtpMail($otp));
+        Mail::to($request->email)->send(new RegisterOtpMail($otp));
 
         return redirect()->route('register.otp.form', ['email' => $request->email])
-                         ->with('success', 'Alhamdulillah, pendaftaran tahap 1 berhasil! Silakan cek email Anda untuk kode OTP.');
+            ->with('success', 'Alhamdulillah, pendaftaran tahap 1 berhasil! Silakan cek email Anda untuk kode OTP.');
     }
 
     // ==========================================
@@ -118,9 +120,9 @@ class AuthController extends Controller
     {
         $email = $request->query('email');
 
-        if (!$email || !Cache::has('register_otp_' . $email)) {
+        if (! $email || ! Cache::has('register_otp_'.$email)) {
             return redirect()->route('register')
-                             ->withErrors('Sesi pendaftaran tidak valid atau sudah kedaluwarsa. Silakan daftar ulang.');
+                ->withErrors('Sesi pendaftaran tidak valid atau sudah kedaluwarsa. Silakan daftar ulang.');
         }
 
         return view('auth.verify-otp', compact('email'));
@@ -133,12 +135,12 @@ class AuthController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'otp'   => 'required|numeric'
+            'otp' => 'required|numeric',
         ]);
 
-        $cachedData = Cache::get('register_otp_' . $request->email);
+        $cachedData = Cache::get('register_otp_'.$request->email);
 
-        if (!$cachedData || $cachedData['otp'] != $request->otp) {
+        if (! $cachedData || $cachedData['otp'] != $request->otp) {
             return back()->withErrors(['otp' => 'Kode OTP salah! Silakan periksa kembali email Anda.']);
         }
 
@@ -146,13 +148,13 @@ class AuthController extends Controller
         $user = $authService->registerCustomer($cachedData);
 
         // Hapus Cache
-        Cache::forget('register_otp_' . $request->email);
+        Cache::forget('register_otp_'.$request->email);
 
         // Login & Redirect
         Auth::login($user);
 
         return redirect()->route('packages.index')
-                         ->with('success', 'Verifikasi berhasil! Akun Anda telah aktif, silakan pilih paket tabungan.');
+            ->with('success', 'Verifikasi berhasil! Akun Anda telah aktif, silakan pilih paket tabungan.');
     }
 
     // ==========================================
@@ -172,7 +174,7 @@ class AuthController extends Controller
         if ($role === 'admin') {
             return redirect('/admin/login');
         }
-        
+
         return redirect('/login');
     }
 }

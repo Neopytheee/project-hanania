@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Departure;
-use App\Models\TravelPackage;
 use App\Models\Group;
+use App\Models\TravelPackage;
 use App\Services\DepartureService;
 use App\Services\GroupService;
 use Illuminate\Http\Request;
@@ -32,10 +32,10 @@ class DepartureController extends Controller
     {
         $validated = $request->validate([
             'travel_package_id' => 'required|exists:travel_packages,id',
-            'name'              => 'required|string|max:255',
-            'departure_date'    => 'required|date',
-            'quota'             => 'required|integer|min:1',
-            'estimated_price'   => 'nullable|numeric|min:0', // Nullable karena Service Anda sudah punya fallback
+            'name' => 'required|string|max:255',
+            'departure_date' => 'required|date',
+            'quota' => 'required|integer|min:1',
+            'estimated_price' => 'nullable|numeric|min:0', // Nullable karena Service Anda sudah punya fallback
         ]);
 
         // Ambil Model Travel Package sesuai kebutuhan Service Anda
@@ -71,7 +71,7 @@ class DepartureController extends Controller
     public function assignGroup(Request $request, Departure $departure)
     {
         $request->validate([
-            'group_id' => 'required|exists:groups,id'
+            'group_id' => 'required|exists:groups,id',
         ]);
 
         $group = Group::findOrFail($request->group_id);
@@ -101,11 +101,11 @@ class DepartureController extends Controller
     public function updatePersiapan(Request $request, $id)
     {
         $departure = Departure::findOrFail($id);
-        
+
         $validated = $request->validate([
-            'manasik_date'     => 'nullable|date',
+            'manasik_date' => 'nullable|date',
             'manasik_location' => 'nullable|string|max:255',
-            'itinerary_file'   => 'nullable|mimes:pdf|max:5120', // Maks 5MB
+            'itinerary_file' => 'nullable|mimes:pdf|max:5120', // Maks 5MB
         ]);
 
         // Tangani jika Admin upload file PDF baru
@@ -136,12 +136,12 @@ class DepartureController extends Controller
     /**
      * Mengeluarkan Rombongan dari Jadwal
      */
-    public function removeGroup(Departure $departure, Group $group, \App\Services\DepartureService $departureService)
+    public function removeGroup(Departure $departure, Group $group, DepartureService $departureService)
     {
         try {
             // Memanggil logika dari DepartureService
             $departureService->removeGroup($departure, $group->id);
-            
+
             return back()->with('success', "Rombongan {$group->name} berhasil dikeluarkan dari jadwal.");
         } catch (\Exception $e) {
             return back()->withErrors([$e->getMessage()]);
@@ -151,15 +151,35 @@ class DepartureController extends Controller
     /**
      * Menghapus Jadwal Keberangkatan
      */
-    public function destroy(Departure $departure, \App\Services\DepartureService $departureService)
+    public function destroy(Departure $departure, DepartureService $departureService)
     {
         try {
             // Memanggil logika dari DepartureService
             $departureService->delete($departure);
-            
+
             return redirect()->route('admin.departures.index')->with('success', 'Jadwal keberangkatan berhasil dihapus dan semua rombongan telah dikosongkan.');
         } catch (\Exception $e) {
             return back()->withErrors([$e->getMessage()]);
         }
+    }
+
+    public function updateItinerary(Request $request, Departure $departure)
+    {
+        $request->validate([
+            'itinerary_file' => 'required|file|mimes:pdf,doc,docx|max:5120', // Maksimal 5MB
+        ]);
+
+        if ($request->hasFile('itinerary_file')) {
+            // Hapus file lama jika ada
+            if ($departure->itinerary_file && Storage::disk('public')->exists($departure->itinerary_file)) {
+                Storage::disk('public')->delete($departure->itinerary_file);
+            }
+
+            // Simpan file baru
+            $path = $request->file('itinerary_file')->store('itineraries', 'public');
+            $departure->update(['itinerary_file' => $path]);
+        }
+
+        return back()->with('success', 'Dokumen itinerary berhasil diperbarui!');
     }
 }

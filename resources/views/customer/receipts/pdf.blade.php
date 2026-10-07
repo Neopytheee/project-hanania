@@ -3,7 +3,7 @@
 <head>
     @php
         // Tarik semua identitas perusahaan dari Database
-        $companyName = \App\Models\AppInformation::getValue('company_name', 'PT. Hanania Tour & Travel');
+        $companyName = \App\Models\AppInformation::getValue('company_name', 'PT. Hanania');
         $tagline = \App\Models\AppInformation::getValue('company_tagline', 'Spesialis Perjalanan Umroh, Haji & Wisata Muslim');
         $address = \App\Models\AppInformation::getValue('office_address', 'Jl. Raya Umroh No. 88, Jakarta Selatan');
         $phone = \App\Models\AppInformation::getValue('phone_number', '(021) 555-8899');
@@ -172,13 +172,18 @@
             </tr>
         </thead>
         <tbody>
+            @php
+                $creditedAmount = (float) ($transaction->net_amount ?? $transaction->amount ?? 0);
+                $feeAmount = (float) ($transaction->fee_amount ?? 0);
+                $chargedAmount = $creditedAmount + $feeAmount;
+            @endphp
             <tr>
                 <td>
                     <strong>{{ strtoupper(str_replace('_', ' ', $transaction->type)) }}</strong><br>
                     <span style="font-size: 11px; color: #666;">Pembayaran tabungan umroh/haji via sistem {{ $companyName }}</span>
                 </td>
                 <td>{{ strtoupper(str_replace('_', ' ', $transaction->payment_method)) }}</td>
-                <td style="text-align: right; font-weight: bold;">Rp {{ number_format($transaction->amount, 0, ',', '.') }}</td>
+                <td style="text-align: right; font-weight: bold;">Rp {{ number_format($chargedAmount, 0, ',', '.') }}</td>
             </tr>
         </tbody>
     </table>
@@ -189,7 +194,7 @@
             <tr>
                 <td><strong>Terbilang:</strong></td>
                 <td style="text-align: right; font-size: 16px; font-weight: bold; color: #5b21b6;">
-                    Rp {{ number_format($transaction->amount, 0, ',', '.') }}
+                    Rp {{ number_format($chargedAmount, 0, ',', '.') }}
                 </td>
             </tr>
         </table>

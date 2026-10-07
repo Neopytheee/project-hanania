@@ -50,10 +50,10 @@
 
                         <div class="absolute left-5 right-5 bottom-5 sm:left-8 sm:right-8 sm:bottom-8 text-white">
                             <div class="flex flex-wrap gap-2 mb-3">
-                                <span class="bg-hanania-gold text-white px-3 py-1.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-[.14em]">Premium Package</span>
+                                <span class="bg-hanania-gold text-white px-3 py-1.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-[.14em]">Paket {{ $travelPackage->category }}</span>
                                 <span class="bg-white/10 backdrop-blur-md border border-white/15 text-white px-3 py-1.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-[.14em]">{{ $travelPackage->duration_days }} Hari</span>
                             </div>
-                            <h1 class="font-heading text-[31px] sm:text-[45px] lg:text-[50px] font-black leading-[1.02] tracking-tight">{{ $travelPackage->name }}</h1>
+                            <h1 class="font-heading text-white text-[31px] sm:text-[45px] lg:text-[50px] font-black leading-[1.02] tracking-tight">{{ $travelPackage->name }}</h1>
                         </div>
                     </div>
 
@@ -92,17 +92,17 @@
                 <div class="bg-white border border-hanania-purple/10 rounded-2xl p-4 shadow-sm">
                     <span class="material-symbols-outlined text-hanania-purple text-[19px]">airlines</span>
                     <p class="text-[8px] uppercase section-kicker text-gray-400 font-black mt-3">Maskapai</p>
-                    <p class="font-heading text-[16px] font-black text-hanania-purple-dark mt-1 truncate">{{ $travelPackage->airline ?? 'Menyusul' }}</p>
+                    <p class="font-heading text-[16px] font-black text-hanania-purple-dark mt-1 truncate">{{ !empty($travelPackage->airline) ? $travelPackage->airline : 'Menyusul' }}</p>
                 </div>
                 <div class="bg-white border border-hanania-purple/10 rounded-2xl p-4 shadow-sm">
                     <span class="material-symbols-outlined text-hanania-purple text-[19px]">domain</span>
                     <p class="text-[8px] uppercase section-kicker text-gray-400 font-black mt-3">Hotel Mekkah</p>
-                    <p class="font-heading text-[16px] font-black text-hanania-purple-dark mt-1 truncate">{{ $travelPackage->hotel_mekkah ?? 'Premium' }}</p>
+                    <p class="font-heading text-[16px] font-black text-hanania-purple-dark mt-1 truncate">{{ !empty($travelPackage->hotel_mekkah) ? $travelPackage->hotel_mekkah : 'Premium' }}</p>
                 </div>
                 <div class="bg-hanania-purple-light/45 border border-hanania-purple/10 rounded-2xl p-4 shadow-sm">
                     <span class="material-symbols-outlined text-hanania-purple text-[19px]">verified</span>
-                    <p class="text-[8px] uppercase section-kicker text-hanania-purple/55 font-black mt-3">Paket</p>
-                    <p class="font-heading text-[16px] font-black text-hanania-purple-dark mt-1">Premium</p>
+                    <p class="text-[8px] uppercase section-kicker text-hanania-purple/55 font-black mt-3">Kategori</p>
+                    <p class="font-heading text-[16px] font-black text-hanania-purple-dark mt-1">{{ ucfirst(strtolower($travelPackage->category)) }}</p>
                 </div>
             </div>
 

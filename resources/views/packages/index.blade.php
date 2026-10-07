@@ -82,7 +82,7 @@
                             <div class="absolute top-3 left-3">
                                 <span class="inline-flex items-center gap-1.5 bg-white/92 px-2.5 py-1.5 rounded-full text-[8px] font-black uppercase tracking-[.14em] text-hanania-purple-dark">
                                     <span class="w-1.5 h-1.5 rounded-full bg-hanania-gold"></span>
-                                    Paket Pilihan
+                                    Paket {{ $package->category }}
                                 </span>
                             </div>
 
@@ -117,7 +117,9 @@
                                     </span>
                                     <div class="min-w-0">
                                         <p class="text-[7px] uppercase tracking-[.14em] font-black text-gray-400">Maskapai</p>
-                                        <p class="text-[10px] sm:text-[11px] font-black text-hanania-purple-dark truncate">{{ $package->airline ?? 'Menyusul' }}</p>
+                                        <p class="text-[10px] sm:text-[11px] font-black text-hanania-purple-dark truncate">
+                                            {{ !empty($package->airline) ? $package->airline : 'Menyusul' }}
+                                        </p>
                                     </div>
                                 </div>
 
@@ -127,7 +129,9 @@
                                     </span>
                                     <div class="min-w-0">
                                         <p class="text-[7px] uppercase tracking-[.14em] font-black text-hanania-purple/55">Hotel</p>
-                                        <p class="text-[10px] sm:text-[11px] font-black text-hanania-purple-dark truncate">{{ $package->hotel_mekkah ?? 'Premium' }}</p>
+                                        <p class="text-[10px] sm:text-[11px] font-black text-hanania-purple-dark truncate">
+                                            {{ !empty($package->hotel_mekkah) ? $package->hotel_mekkah : 'Premium' }}
+                                        </p>
                                     </div>
                                 </div>
                             </div>

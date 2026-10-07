@@ -74,15 +74,15 @@
                                 <div class="flex items-center justify-end gap-2">
                                     
                                     <!-- Tombol Setuju -->
-                                    <form action="{{ route('admin.documents.approve', $doc->id) }}" method="POST">
+                                    <form action="{{ route('admin.documents.approve', $doc->id) }}" method="POST" class="js-approve-document" data-passenger-name="{{ $doc->enrollment->customer->name ?? 'Jamaah' }}" data-document-type="{{ str_replace('_', ' ', $doc->document_type) }}">
                                         @csrf
-                                        <button type="submit" onclick="return confirm('Sahkan dokumen {{ str_replace('_', ' ', $doc->document_type) }} milik {{ $doc->enrollment->customer->name ?? 'Jamaah' }}?')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-[12px] font-bold transition-all shadow-[0_4px_10px_rgba(16,185,129,0.3)] flex items-center justify-center gap-1.5">
+                                        <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-[12px] font-bold transition-all shadow-[0_4px_10px_rgba(16,185,129,0.3)] flex items-center justify-center gap-1.5">
                                             <span class="material-symbols-outlined text-[16px]">check_circle</span> Sahkan
                                         </button>
                                     </form>
 
                                     <!-- Tombol Tolak (Panggil Modal) -->
-                                    <button type="button" onclick="openRejectDocModal('{{ route('admin.documents.reject', $doc->id) }}', '{{ $doc->enrollment->customer->name ?? 'Jamaah' }}', '{{ str_replace('_', ' ', $doc->document_type) }}')" class="bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 px-4 py-2.5 rounded-xl text-[12px] font-bold transition-all shadow-sm flex items-center justify-center gap-1.5">
+                                    <button type="button" class="js-reject-document bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 px-4 py-2.5 rounded-xl text-[12px] font-bold transition-all shadow-sm flex items-center justify-center gap-1.5" data-action-url="{{ route('admin.documents.reject', $doc->id) }}" data-passenger-name="{{ $doc->enrollment->customer->name ?? 'Jamaah' }}" data-document-type="{{ str_replace('_', ' ', $doc->document_type) }}">
                                         <span class="material-symbols-outlined text-[16px]">cancel</span> Tolak
                                     </button>
 
@@ -146,6 +146,27 @@
 </div>
 
 <script>
+    document.querySelectorAll('.js-approve-document').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            const passengerName = form.dataset.passengerName || 'Jamaah';
+            const documentType = form.dataset.documentType || 'dokumen';
+
+            if (!window.confirm(`Sahkan dokumen ${documentType} milik ${passengerName}?`)) {
+                event.preventDefault();
+            }
+        });
+    });
+
+    document.querySelectorAll('.js-reject-document').forEach((button) => {
+        button.addEventListener('click', () => {
+            openRejectDocModal(
+                button.dataset.actionUrl,
+                button.dataset.passengerName,
+                button.dataset.documentType,
+            );
+        });
+    });
+
     function openRejectDocModal(actionUrl, passengerName, docType) {
         const modal = document.getElementById('rejectDocModal');
         const modalContent = document.getElementById('rejectDocModalContent');

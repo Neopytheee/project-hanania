@@ -61,7 +61,7 @@
                             ? "⚠️ PERINGATAN: Kuota BELUM PENUH (".$totalJamaah."/".$totalCapacity." kursi).\n\nYakin ingin tetap memberangkatkan jadwal ini?" 
                             : "Bismillah. Kuota penuh (".$totalJamaah." Jamaah).\n\nYakin ingin memberangkatkan jadwal ini sekarang?";
                     @endphp
-                    <form action="{{ route('admin.departures.depart', $departure->id) }}" method="POST" onsubmit="return confirm('{{ $confirmMsg }}');" class="w-full">
+                    <form action="{{ route('admin.departures.depart', $departure->id) }}" method="POST" class="js-confirm-departure w-full" data-confirm-message="{{ $confirmMsg }}">
                         @csrf
                         <button type="submit" class="w-full md:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black px-8 py-3.5 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 transition-all transform hover:scale-105 border-2 border-emerald-300 animate-pulse">
                             <span class="material-symbols-outlined [font-variation-settings:'FILL'_1]">flight_takeoff</span> TAKE OFF SEKARANG!
@@ -158,6 +158,41 @@
                     </button>
                 </form>
             </div>
+
+            <!-- DOKUMEN ITINERARY -->
+            <div class="card-admin p-5 sm:p-6 border-t-4 border-t-emerald-500">
+                <h3 class="font-black text-[14px] mb-4 text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-emerald-500">description</span> Dokumen Itinerary
+                </h3>
+                
+                <!-- Status File Saat Ini -->
+                @if($departure->itinerary_file)
+                    <div class="mb-4 bg-emerald-50/50 border border-emerald-200 rounded-xl p-3 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <span class="material-symbols-outlined text-emerald-600 shrink-0">task</span>
+                            <span class="text-[11px] font-bold text-emerald-900 truncate">Itinerary tersedia</span>
+                        </div>
+                        <a href="{{ asset('storage/' . $departure->itinerary_file) }}" target="_blank" class="text-[11px] bg-white border border-emerald-300 text-emerald-700 hover:bg-emerald-50 font-bold px-3 py-1.5 rounded-lg shrink-0 transition-colors shadow-sm">
+                            Lihat
+                        </a>
+                    </div>
+                @else
+                    <p class="text-[11px] text-slate-400 italic mb-4">Belum ada file itinerary yang diunggah untuk kloter ini.</p>
+                @endif
+
+                <form action="{{ route('admin.departures.update-itinerary', $departure->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+                    @method('PUT')
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-2">Unggah / Ganti File (PDF / Doc)</label>
+                        <input type="file" name="itinerary_file" accept=".pdf,.doc,.docx" class="w-full text-[12px] text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer transition-all border border-slate-200 rounded-xl bg-slate-50 p-1.5" required>
+                        <p class="text-[10px] text-slate-400 mt-1.5 font-medium">Format: PDF/DOC/DOCX. Maksimal 5MB.</p>
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl transition-colors shadow-sm text-[13px] flex items-center justify-center gap-1.5">
+                        <span class="material-symbols-outlined text-[18px]">upload_file</span> Simpan Itinerary
+                    </button>
+                </form>
+            </div>
             
         </div>
 
@@ -236,4 +271,13 @@
 
     </div>
 </div>
+<script>
+    document.querySelectorAll('.js-confirm-departure').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            if (!window.confirm(form.dataset.confirmMessage)) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
 @endsection

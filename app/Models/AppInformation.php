@@ -25,6 +25,12 @@ class AppInformation extends Model
     public static function getValue($key, $default = null)
     {
         $info = self::where('key', $key)->first();
+
         return $info ? $info->value : $default;
+    }
+
+    public static function isPaymentMidtransEnabled(): bool
+    {
+        return filter_var(self::getValue('payment_midtrans_enabled', '1'), FILTER_VALIDATE_BOOLEAN);
     }
 }

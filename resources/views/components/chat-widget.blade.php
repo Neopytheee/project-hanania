@@ -199,24 +199,22 @@
             ? 'flex items-end gap-2 max-w-[90%] sm:max-w-[88%] self-end' 
             : 'flex items-start gap-2 sm:gap-2.5 max-w-[90%] sm:max-w-[88%]';
             
-        let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        // 🔒 DOM XSS FIX: Buat kontainer teks aman menggunakan textContent (Anti HTML Injection)
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = sender === 'user'
+            ? 'bg-hanania-purple text-white p-3 sm:p-4 rounded-2xl sm:rounded-[1.25rem] rounded-tr-sm shadow-md'
+            : 'bg-hanania-purple-light/40 p-3 sm:p-4 rounded-2xl sm:rounded-[1.25rem] rounded-tl-sm border border-hanania-purple/10 shadow-sm';
 
-        if (sender === 'user') {
-            messageDiv.innerHTML = `
-                <div class="bg-hanania-purple text-white p-3 sm:p-4 rounded-2xl sm:rounded-[1.25rem] rounded-tr-sm shadow-md">
-                    <p class="text-[13px] sm:text-[14px] font-medium leading-relaxed whitespace-pre-wrap">${formattedText}</p>
-                </div>
-            `;
-        } else {
-            messageDiv.innerHTML = `
-                <div class="w-7 h-7 sm:w-8 sm:h-8 bg-hanania-purple-light rounded-full flex items-center justify-center shrink-0 border border-hanania-purple/10">
-                    <span class="material-symbols-outlined text-hanania-purple text-[14px] sm:text-[16px]">smart_toy</span>
-                </div>
-                <div class="bg-hanania-purple-light/40 p-3 sm:p-4 rounded-2xl sm:rounded-[1.25rem] rounded-tl-sm border border-hanania-purple/10 shadow-sm">
-                    <p class="text-[13px] sm:text-[14px] text-hanania-purple-dark font-medium leading-relaxed whitespace-pre-wrap">${formattedText}</p>
-                </div>
-            `;
-        }
+        const pTag = document.createElement('p');
+        pTag.className = sender === 'user'
+            ? 'text-[13px] sm:text-[14px] font-medium leading-relaxed whitespace-pre-wrap'
+            : 'text-[13px] sm:text-[14px] text-hanania-purple-dark font-medium leading-relaxed whitespace-pre-wrap';
+        
+        // Menggunakan textContent untuk membersihkan script berbahaya dari LLM/User
+        pTag.textContent = text; 
+
+        bubbleDiv.appendChild(pTag);
+        messageDiv.appendChild(bubbleDiv);
 
         chatMessages.insertBefore(messageDiv, chatLoading);
     }

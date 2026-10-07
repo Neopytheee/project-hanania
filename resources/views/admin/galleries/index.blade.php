@@ -131,7 +131,7 @@
 
                             <!-- Delete Overlay (Hover) -->
                             <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-30">
-                                <form action="{{ route('admin.galleries.destroy', $foto->id) }}" method="POST" onsubmit="return confirm('Peringatan: Yakin ingin menghapus foto {{ $foto->title }}?');">
+                                <form action="{{ route('admin.galleries.destroy', $foto->id) }}" method="POST" onsubmit="return confirm('Peringatan: Yakin ingin menghapus foto ? Data yang dihapus tidak dapat dikembalikan.');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 hover:scale-110 transition-all shadow-lg" title="Hapus Foto">

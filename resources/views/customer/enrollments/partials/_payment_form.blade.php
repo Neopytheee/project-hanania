@@ -2,6 +2,10 @@
     <h4 class="font-bold text-gray-800 border-b border-gray-100 pb-3 mb-4">Setor Tabungan Baru</h4>
     
     @if($progress['sisa_tagihan'] > 0)
+        @php
+            $midtransEnabled = \App\Models\AppInformation::isPaymentMidtransEnabled();
+        @endphp
+
         <form action="{{ route('customer.payments.store', $enrollment->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             <div>
@@ -14,12 +18,14 @@
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Metode Pembayaran</label>
                 <div class="grid grid-cols-2 gap-3">
-                    <label class="border rounded-xl p-3 flex items-center gap-2 cursor-pointer hover:border-hanania-purple transition">
-                        <input type="radio" name="payment_method" value="midtrans" checked onchange="togglePaymentMethod()">
-                        <span class="text-xs font-bold text-gray-800">Otomatis (Midtrans)</span>
-                    </label>
-                    <label class="border rounded-xl p-3 flex items-center gap-2 cursor-pointer hover:border-hanania-purple transition">
-                        <input type="radio" name="payment_method" value="manual_transfer" onchange="togglePaymentMethod()">
+                    @if($midtransEnabled)
+                        <label class="border rounded-xl p-3 flex items-center gap-2 cursor-pointer hover:border-hanania-purple transition">
+                            <input type="radio" name="payment_method" value="midtrans" checked onchange="togglePaymentMethod()">
+                            <span class="text-xs font-bold text-gray-800">Otomatis (Midtrans)</span>
+                        </label>
+                    @endif
+                    <label class="border rounded-xl p-3 flex items-center gap-2 cursor-pointer hover:border-hanania-purple transition {{ $midtransEnabled ? '' : 'col-span-2' }}">
+                        <input type="radio" name="payment_method" value="manual_transfer" {{ $midtransEnabled ? '' : 'checked' }} onchange="togglePaymentMethod()">
                         <span class="text-xs font-bold text-gray-800">Transfer Manual</span>
                     </label>
                 </div>

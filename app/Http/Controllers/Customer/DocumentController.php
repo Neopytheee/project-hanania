@@ -3,16 +3,15 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
-use App\Models\Enrollment;
 use App\Models\Document;
+use App\Models\Enrollment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
-{   
-    public function index(\App\Models\Enrollment $enrollment)
+{
+    public function index(Enrollment $enrollment)
     {
-        // Pastikan jamaah hanya bisa melihat dokumennya sendiri
         if ($enrollment->customer_id !== auth()->user()->customer->id) {
             abort(403, 'Akses ditolak.');
         }
@@ -22,67 +21,54 @@ class DocumentController extends Controller
 
     public function store(Request $request, Enrollment $enrollment)
     {
-        // Pastikan milik jamaah itu sendiri
         if ($enrollment->customer_id !== $request->user()->customer->id) {
             abort(403, 'Akses ditolak.');
         }
 
         $request->validate([
             'document_type' => 'required|in:ktp,kk,passport_biodata,passport_endorsement,photo,other',
-            'file_path'     => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120', // Maksimal 5MB
+            'file_path' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
+        // 🔒 PERBAIKAN: Simpan ke disk 'local' (Private), bukan 'public'
         $file = $request->file('file_path');
-        $path = $file->store('dokumen_jamaah/' . $enrollment->id, 'public');
+        $path = $file->store('dokumen_jamaah/'.$enrollment->id, 'local');
 
-        // Cari dokumen lama jika ada
         $existingDoc = Document::where('enrollment_id', $enrollment->id)
-                               ->where('document_type', $request->document_type)
-                               ->first();
+            ->where('document_type', $request->document_type)
+            ->first();
 
-        // Hapus file fisik yang lama agar server tidak penuh
-        if ($existingDoc && Storage::disk('public')->exists($existingDoc->file_path)) {
-            Storage::disk('public')->delete($existingDoc->file_path);
+        // 🔒 PERBAIKAN: Hapus dari disk 'local'
+        if ($existingDoc && Storage::disk('local')->exists($existingDoc->file_path)) {
+            Storage::disk('local')->delete($existingDoc->file_path);
         }
 
-        // Simpan atau Update ke database
         Document::updateOrCreate(
             ['enrollment_id' => $enrollment->id, 'document_type' => $request->document_type],
             [
                 'file_path' => $path,
-                'status'    => 'submitted', // Reset status ke submitted
-                'rejection_reason' => null, // Hapus alasan penolakan sebelumnya
+                'status' => 'submitted',
+                'rejection_reason' => null,
                 'uploaded_at' => now(),
             ]
         );
 
-        return back()->with('success', 'Dokumen ' . strtoupper($request->document_type) . ' berhasil diunggah dan sedang direview.');
+        return back()->with('success', 'Dokumen '.strtoupper($request->document_type).' berhasil diunggah dan sedang direview.');
     }
 
-    /**
-     * Memaksa browser untuk melakukan PREVIEW file (bukan download)
-     */
-    /**
-     * Memaksa browser untuk melakukan PREVIEW file secara aman dari celah IDOR
-     */
     public function preview($id)
     {
-        // Ambil dokumen beserta relasi enrollment dan customer-nya
-        $document = \App\Models\Document::with('enrollment.customer')->findOrFail($id); 
-        
-        // 🛡️ AMAN KELAS BERAT: Validasi kepemilikan dokumen
-        if (!$document->enrollment || $document->enrollment->customer_id !== auth()->user()->customer->id) {
+        $document = Document::with('enrollment')->findOrFail($id);
+
+        if (! $document->enrollment || $document->enrollment->customer_id !== auth()->user()->customer->id) {
             abort(403, 'Akses ditolak. Dokumen ini bukan milik Anda.');
         }
 
-        // Ambil path fisik file di dalam folder storage Laravel
-        $path = storage_path('app/public/' . $document->file_path);
-
-        // Cek apakah file fisik benar-benar ada
-        if (!file_exists($path)) {
+        // 🔒 PERBAIKAN: Cek dan ambil path absolut file dari disk 'local'
+        if (! Storage::disk('local')->exists($document->file_path)) {
             abort(404, 'File dokumen tidak ditemukan.');
         }
 
-        return response()->file($path);
+        return response()->file(Storage::disk('local')->path($document->file_path));
     }
 }

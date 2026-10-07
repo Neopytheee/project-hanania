@@ -160,7 +160,7 @@
                                 
                                 <!-- Aksi -->
                                 <td class="p-4 sm:px-6 text-right">
-                                    <form action="{{ route('admin.groups.remove', $member->id) }}" method="POST" onsubmit="return confirm('Peringatan: Yakin ingin mengeluarkan {{ $member->enrollment->passenger_name }} dari rombongan ini?');">
+                                    <form action="{{ route('admin.groups.remove', $member->id) }}" method="POST" class="js-remove-membership-form" data-passenger-name="{{ $member->enrollment->passenger_name }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-white border border-rose-200 text-rose-500 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all shadow-sm" title="Keluarkan dari rombongan">
@@ -190,4 +190,15 @@
         
     </div>
 </div>
+<script>
+    document.querySelectorAll('.js-remove-membership-form').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            const passengerName = form.dataset.passengerName || 'jamaah ini';
+
+            if (!window.confirm(`Peringatan: Yakin ingin mengeluarkan ${passengerName} dari rombongan ini?`)) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
 @endsection

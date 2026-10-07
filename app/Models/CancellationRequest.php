@@ -18,6 +18,7 @@ class CancellationRequest extends Model
         'supporting_document',
         'admin_acc_document',
         'admin_transfer_proof',
+        'requested_amount',
         'penalty_amount',
         'refund_amount',
         'credit_amount',
@@ -30,6 +31,7 @@ class CancellationRequest extends Model
     protected function casts(): array
     {
         return [
+            'requested_amount' => 'decimal:2',
             'penalty_amount' => 'decimal:2',
             'refund_amount' => 'decimal:2',
             'credit_amount' => 'decimal:2',

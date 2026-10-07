@@ -3,6 +3,13 @@
 @section('title', 'Syarat & Ketentuan Tabungan Umroh')
 
 @section('content')
+@php
+    $phoneNumber = \App\Models\AppInformation::getValue('phone_number', '');
+    $whatsappNumber = preg_replace('/[^0-9]/', '', $phoneNumber);
+    if (str_starts_with($whatsappNumber, '0')) {
+        $whatsappNumber = '62'.substr($whatsappNumber, 1);
+    }
+@endphp
 <style>
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(14px); }
@@ -117,9 +124,9 @@
             <div class="inline-flex flex-col sm:flex-row items-center justify-center gap-3 bg-white border border-hanania-purple/10 px-6 py-4 rounded-full shadow-sm">
                 <span class="text-sm font-bold text-gray-500">Butuh informasi lebih lanjut?</span>
                 <div class="h-1 w-1 bg-gray-300 rounded-full hidden sm:block"></div>
-                <a href="https://wa.me/6285714178178" target="_blank" class="inline-flex items-center gap-2 text-hanania-gold font-extrabold hover:text-hanania-purple transition-colors">
+                <a href="{{ rtrim(config('services.whatsapp.web_url'), '/') }}/{{ $whatsappNumber }}" target="_blank" class="inline-flex items-center gap-2 text-hanania-gold font-extrabold hover:text-hanania-purple transition-colors">
                     <span class="material-symbols-outlined text-[20px]">chat</span>
-                    0857-14-178-178
+                    {{ $phoneNumber }}
                 </a>
             </div>
         </div>

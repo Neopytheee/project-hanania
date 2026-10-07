@@ -52,7 +52,7 @@
 
         $googleMapsLink = \App\Models\AppInformation::getValue(
             'google_maps_link',
-            'https://maps.google.com/?q=Gedung+Senayan'
+            config('services.google_maps.default_url')
         );
     @endphp
 
@@ -220,7 +220,7 @@
 
                     {{-- WHATSAPP --}}
                     <a
-                        href="https://wa.me/{{ $waNumber }}?text={{ urlencode($waMessage) }}"
+                        href="{{ rtrim(config('services.whatsapp.web_url'), '/') }}/{{ $waNumber }}?text={{ urlencode($waMessage) }}"
                         target="_blank"
                         class="group card-hanania p-5 hover:-translate-y-1"
                     >

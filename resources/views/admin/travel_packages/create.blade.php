@@ -61,6 +61,30 @@
                 @error('name') <p class="text-rose-500 text-[11px] mt-1 font-bold">{{ $message }}</p> @enderror
             </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Maskapai -->
+            <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-2 uppercase tracking-wide">Maskapai <span class="text-slate-400 normal-case">(Opsional)</span></label>
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-hanania-purple transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">airlines</span>
+                    </div>
+                    <input type="text" name="airline" value="{{ old('airline') }}" placeholder="Contoh: Saudia Airlines / Garuda" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-bold text-slate-800 focus:bg-white focus:border-hanania-purple focus:ring-4 focus:ring-hanania-purple/10 outline-none transition-all">
+                </div>
+            </div>
+
+            <!-- Hotel Mekkah -->
+            <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-2 uppercase tracking-wide">Hotel Mekkah <span class="text-slate-400 normal-case">(Opsional)</span></label>
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-hanania-purple transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">domain</span>
+                    </div>
+                    <input type="text" name="hotel_mekkah" value="{{ old('hotel_mekkah') }}" placeholder="Contoh: Pullman Zamzam / Bintang 5" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-bold text-slate-800 focus:bg-white focus:border-hanania-purple focus:ring-4 focus:ring-hanania-purple/10 outline-none transition-all">
+                </div>
+            </div>
+        </div>
+
             <!-- Harga Target -->
             <div>
                 <label class="block text-[11px] font-bold text-slate-700 mb-2 uppercase tracking-wide">Estimasi Harga (Target Tabungan) <span class="text-rose-500">*</span></label>

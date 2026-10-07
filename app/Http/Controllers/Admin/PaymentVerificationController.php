@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\PaymentTransaction;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PaymentVerificationController extends Controller
 {
@@ -20,9 +22,9 @@ class PaymentVerificationController extends Controller
     public function index()
     {
         $pendingTransactions = PaymentTransaction::with([
-                'paymentPlan.enrollment.customer', 
-                'paymentPlan.enrollment.travelPackage'
-            ])
+            'paymentPlan.enrollment.customer',
+            'paymentPlan.enrollment.travelPackage',
+        ])
             ->where('status', 'pending')
             ->orderBy('created_at', 'asc') // Yang bayar duluan, diurus duluan (antrean)
             ->get();
@@ -35,6 +37,7 @@ class PaymentVerificationController extends Controller
     {
         try {
             $this->paymentService->verifyPayment($transaction, $request->user());
+
             return redirect()->back()->with('success', 'Alhamdulillah, pembayaran berhasil diverifikasi!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -45,12 +48,22 @@ class PaymentVerificationController extends Controller
     public function reject(Request $request, PaymentTransaction $transaction)
     {
         $request->validate(['reason' => 'required|string|max:255']);
-        
+
         try {
             $this->paymentService->rejectPayment($transaction, $request->user(), $request->reason);
+
             return redirect()->back()->with('success', 'Pembayaran telah ditolak.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
+    }
+
+    public function proof(PaymentTransaction $transaction): BinaryFileResponse
+    {
+        if (! $transaction->proof_file || ! Storage::disk('local')->exists($transaction->proof_file)) {
+            abort(404, 'Bukti transfer tidak ditemukan.');
+        }
+
+        return response()->file(Storage::disk('local')->path($transaction->proof_file));
     }
 }

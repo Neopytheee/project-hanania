@@ -14,36 +14,39 @@ class WhatsappService
     {
         try {
             $formattedTarget = self::formatPhoneNumber($targetNumber);
-            $token = env('FONNTE_TOKEN');
 
-            if (!$token) {
-                Log::error("Gagal kirim WA: FONNTE_TOKEN belum diisi di file .env!");
+            // 🔒 PERBAIKAN: Gunakan config() yang aman untuk deployment (Cache-safe)
+            $token = config('services.fonnte.token');
+
+            if (! $token) {
+                Log::error('Gagal kirim WA: FONNTE_TOKEN belum dikonfigurasi!');
+
                 return false;
             }
 
-            // Gunakan asForm() karena Fonnte mewajibkan format Form Data
-            $response = Http::asForm()->withHeaders([
+            // 🔒 PERBAIKAN: Tambahkan timeout(10) untuk mencegah Server Hang (Resource Exhaustion)
+            $response = Http::asForm()->timeout(10)->withHeaders([
                 'Authorization' => $token,
-            ])->post('https://api.fonnte.com/send', [
-                'target'  => $formattedTarget,
+            ])->post(config('services.fonnte.endpoint'), [
+                'target' => $formattedTarget,
                 'message' => $message,
             ]);
 
-            // Baca balasan asli dari Fonnte
             $result = $response->json();
 
-            // Cek apakah balasan Fonnte benar-benar berstatus "true"
             if ($response->successful() && isset($result['status']) && $result['status'] === true) {
                 Log::info("WA SUKSES (Fonnte): Pesan terkirim ke {$formattedTarget}");
+
                 return true;
             }
 
-            // Jika gagal, catat alasan penolakan dari Fonnte
-            Log::error("Fonnte Menolak Pesan: " . $response->body());
+            Log::error('Fonnte Menolak Pesan: '.$response->body());
+
             return false;
 
         } catch (\Exception $e) {
-            Log::error("Error WA Service: " . $e->getMessage());
+            Log::error('Error WA Service: '.$e->getMessage());
+
             return false;
         }
     }
@@ -52,8 +55,9 @@ class WhatsappService
     {
         $number = preg_replace('/[^0-9]/', '', $number);
         if (str_starts_with($number, '0')) {
-            return '62' . substr($number, 1);
+            return '62'.substr($number, 1);
         }
+
         return $number;
     }
 }

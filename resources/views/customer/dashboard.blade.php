@@ -166,7 +166,7 @@
                     <div class="bg-hanania-purple-dark text-white p-7 sm:p-10 relative overflow-hidden">
                         <div class="absolute -right-16 -bottom-16 w-48 h-48 rounded-full border-[24px] border-hanania-purple-light/10"></div>
                         <div class="relative z-10">
-                            <span class="text-[9px] font-black uppercase tracking-[.21em] text-hanania-purple-light">Begin Perjalanan Anda</span>
+                            <span class="text-[9px] font-black uppercase tracking-[.21em] text-hanania-purple-light">Mulai Perjalanan Anda</span>
                             <h2 class="font-heading text-[29px] sm:text-[36px] font-black tracking-tight leading-tight mt-3">
                                 Wujudkan Niat Suci ke Baitullah
                             </h2>
@@ -206,77 +206,79 @@
                         </div>
                         <div class="inline-flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-full px-3 py-1.5">
                             <span class="material-symbols-outlined text-[13px] text-hanania-gold">location_on</span>
-                            <span class="text-[9px] font-bold text-hanania-purple-dark">{{ \App\Models\AppInformation::getValue('default_location', 'Jakarta') }}</span>
+                            <span id="location-name" class="text-[9px] font-bold text-hanania-purple-dark">Jakarta</span>
                         </div>
                     </div>
 
                     <div class="space-y-2.5">
                         <div class="flex items-center justify-between px-3 py-3 rounded-2xl">
                             <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Subuh</span>
-                            <span class="text-[14px] font-black text-hanania-purple-dark">04:30</span>
+                            <span id="time-subuh" class="text-[14px] font-black text-hanania-purple-dark">--:--</span>
                         </div>
                         <div class="flex items-center justify-between px-3 py-3.5 rounded-2xl bg-hanania-purple text-white shadow-lg">
                             <span class="text-[10px] uppercase tracking-widest font-black text-hanania-purple-light">Dzuhur</span>
-                            <span class="text-[17px] font-black">11:55</span>
+                            <span id="time-dzuhur" class="text-[17px] font-black">--:--</span>
                         </div>
                         <div class="flex items-center justify-between px-3 py-3 rounded-2xl">
                             <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Ashar</span>
-                            <span class="text-[14px] font-black text-hanania-purple-dark">15:15</span>
+                            <span id="time-ashar" class="text-[14px] font-black text-hanania-purple-dark">--:--</span>
                         </div>
                         <div class="flex items-center justify-between px-3 py-3 rounded-2xl">
                             <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Maghrib</span>
-                            <span class="text-[14px] font-black text-hanania-purple-dark">17:50</span>
+                            <span id="time-maghrib" class="text-[14px] font-black text-hanania-purple-dark">--:--</span>
                         </div>
                         <div class="flex items-center justify-between px-3 py-3 rounded-2xl">
                             <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Isya</span>
-                            <span class="text-[14px] font-black text-hanania-purple-dark">19:05</span>
+                            <span id="time-isya" class="text-[14px] font-black text-hanania-purple-dark">--:--</span>
                         </div>
                     </div>
                 </section>
 
-                <!-- BEKAL -->
+                <!-- ARTIKEL / TIPS PERJALANAN TERBARU -->
                 <section class="min-w-0">
                     <div class="flex items-end justify-between gap-4 mb-5">
                         <div>
-                            <span class="text-[9px] font-black uppercase tracking-[.2em] text-hanania-purple">Prepare Well</span>
-                            <h3 class="font-heading text-[22px] font-black text-hanania-purple-dark mt-1">Bekal Ibadah</h3>
+                            <span class="text-[9px] font-black uppercase tracking-[.2em] text-hanania-purple">Travel Insights</span>
+                            <h3 class="font-heading text-[22px] font-black text-hanania-purple-dark mt-1">Tips & Artikel Perjalanan</h3>
                         </div>
-                        <span class="hidden sm:block text-[10px] text-gray-400 font-medium">Materi ringkas untuk menemani persiapan</span>
+                        <span class="hidden sm:block text-[10px] text-gray-400 font-medium">Informasi dan panduan penting untuk jamaah</span>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-2.5">
-                        <a href="#" class="group bg-hanania-purple-dark text-white rounded-[1.6rem] p-5 min-h-[185px] flex flex-col justify-between soft-lift">
-                            <div class="w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-[20px] [font-variation-settings:'FILL'_1]">auto_stories</span>
-                            </div>
-                            <div>
-                                <h4 class="font-heading text-[16px] font-black">Kumpulan Doa</h4>
-                                <p class="text-[10px] text-white/50 leading-relaxed mt-1.5">Doa mustajab Tanah Suci</p>
-                                <span class="material-symbols-outlined text-[16px] text-hanania-gold mt-4 group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                            </div>
-                        </a>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        @php
+                            $articles = \App\Models\Article::latest()->take(3)->get();
+                        @endphp
 
-                        <a href="#" class="group bg-hanania-purple-light/50 border border-hanania-purple/10 text-hanania-purple-dark rounded-[1.6rem] p-5 min-h-[185px] flex flex-col justify-between soft-lift">
-                            <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-                                <span class="material-symbols-outlined text-[20px] [font-variation-settings:'FILL'_1]">directions_walk</span>
+                        @forelse($articles as $article)
+                            <div class="group bg-white border border-hanania-purple/10 rounded-[1.6rem] overflow-hidden flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+                                <div class="h-36 overflow-hidden bg-gray-100 relative">
+                                    @if($article->image)
+                                        <img src="{{ asset('storage/' . $article->image) }}" alt="{{ $article->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center text-hanania-purple/30">
+                                            <span class="material-symbols-outlined text-3xl">article</span>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="p-5 flex flex-col justify-between flex-grow">
+                                    <div>
+                                        <h4 class="font-heading text-[15px] font-black text-hanania-purple-dark line-clamp-2 group-hover:text-hanania-purple transition-colors">
+                                            {{ $article->title }}
+                                        </h4>
+                                        <p class="text-[11px] text-gray-500 leading-relaxed mt-1.5 line-clamp-2">
+                                            {{ $article->excerpt ?? 'Baca selengkapnya panduan perjalanan bersama Hanania.' }}
+                                        </p>
+                                    </div>
+                                    <a href="{{ route('customer.articles.show', $article->slug) }}" class="inline-flex items-center gap-1 text-[11px] font-black text-hanania-purple mt-4 group-hover:translate-x-1 transition-transform">
+                                        Baca Selengkapnya <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+                                    </a>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="font-heading text-[16px] font-black">Tata Cara Sa'i</h4>
-                                <p class="text-[10px] text-gray-500 leading-relaxed mt-1.5">Rukun dan panduan Sa'i</p>
-                                <span class="material-symbols-outlined text-[16px] text-hanania-purple mt-4 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        @empty
+                            <div class="col-span-full py-8 text-center text-gray-400 text-xs bg-white rounded-2xl border border-dashed border-hanania-purple/15">
+                                Belum ada artikel atau tips perjalanan yang dipublikasikan.
                             </div>
-                        </a>
-
-                        <a href="#" class="group bg-white border border-hanania-purple/10 text-hanania-purple-dark rounded-[1.6rem] p-5 min-h-[185px] flex flex-col justify-between soft-lift">
-                            <div class="w-10 h-10 rounded-full bg-hanania-purple-light/55 flex items-center justify-center text-hanania-purple">
-                                <span class="material-symbols-outlined text-[20px] [font-variation-settings:'FILL'_1]">headphones</span>
-                            </div>
-                            <div>
-                                <h4 class="font-heading text-[16px] font-black">Audio Manasik</h4>
-                                <p class="text-[10px] text-gray-500 leading-relaxed mt-1.5">Dengarkan materi manasik</p>
-                                <span class="material-symbols-outlined text-[16px] text-hanania-gold mt-4 group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                            </div>
-                        </a>
+                        @endforelse
                     </div>
                 </section>
             </div>
@@ -350,7 +352,7 @@
             </section>
 
             <!-- CLOSING EDITORIAL -->
-            <section class="relative overflow-hidden rounded-[2.2rem] bg-hanania-purple-light/45 border border-hanania-purple/10 p-6 sm:p-10">
+            <!-- <section class="relative overflow-hidden rounded-[2.2rem] bg-hanania-purple-light/45 border border-hanania-purple/10 p-6 sm:p-10">
                 <div class="absolute right-0 top-0 text-hanania-purple/10">
                     <span class="material-symbols-outlined text-[190px] [font-variation-settings:'FILL'_1]">menu_book</span>
                 </div>
@@ -371,7 +373,7 @@
                         <span class="material-symbols-outlined text-[17px]">auto_stories</span>
                     </a>
                 </div>
-            </section>
+            </section> -->
 
             <!-- MINI FOOTER -->
             <div class="py-7 text-center">
@@ -382,3 +384,32 @@
         </div>
     </div>
 @endsection
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Kota default (bisa disesuaikan atau diambil dinamis)
+        const city = "Jakarta";
+        const country = "Indonesia";
+        
+        // Menggunakan Aladhan API (Gratis, Tanpa API Key, Metode 20 = Kemenag Indonesia)
+        const apiUrl = `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=20`;
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.code === 200) {
+                    const timings = data.data.timings;
+
+                    // Masukkan data ke HTML sesuai ID
+                    document.getElementById('time-subuh').textContent = timings.Fajr;
+                    document.getElementById('time-dzuhur').textContent = timings.Dhuhr;
+                    document.getElementById('time-ashar').textContent = timings.Asr;
+                    document.getElementById('time-maghrib').textContent = timings.Maghrib;
+                    document.getElementById('time-isya').textContent = timings.Isha;
+                }
+            })
+            .catch(error => {
+                console.error('Gagal memuat jadwal shalat:', error);
+            });
+    });
+</script>

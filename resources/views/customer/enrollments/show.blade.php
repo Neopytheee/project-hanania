@@ -330,25 +330,46 @@
                             @endforeach
 
                             @forelse($historyTransactions as $trx)
-                                <div class="rounded-2xl border border-hanania-purple/10 bg-hanania-purple-light/15 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 group">
-                                    <div>
-                                        <p class="text-[12px] font-black text-hanania-purple-dark">{{ ucfirst(str_replace('_', ' ', $trx->type)) }}</p>
-                                        <p class="text-[9px] text-gray-500 mt-1">{{ $trx->created_at->format('d M Y, H:i') }}</p>
-                                    </div>
-                                    <div class="flex items-center justify-between sm:justify-end gap-3">
-                                        <div class="text-left sm:text-right">
-                                            <p class="font-heading text-[16px] font-black text-hanania-purple">Rp {{ number_format($trx->amount, 0, ',', '.') }}</p>
-                                            <span class="inline-flex mt-1.5 text-[8px] uppercase tracking-wider font-black px-2.5 py-1 rounded-full {{ $trx->status === 'verified' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-red-50 text-red-600 border border-red-200' }}">
-                                                {{ $trx->status }}
-                                            </span>
-                                        </div>
-                                        @if($trx->status === 'verified')
-                                            <a href="{{ route('customer.receipts.download', $trx->id) }}" target="_blank" class="w-9 h-9 rounded-full bg-white border border-hanania-purple/10 text-hanania-purple flex items-center justify-center hover:bg-hanania-purple hover:text-white transition-colors" title="Unduh Kuitansi">
-                                                <span class="material-symbols-outlined text-[17px]">download</span>
-                                            </a>
+                            <div class="rounded-2xl border border-hanania-purple/10 {{ $trx->type === 'refund' ? 'bg-red-50/50' : 'bg-hanania-purple-light/15' }} p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 group">
+                                <div>
+                                    <p class="text-[12px] font-black {{ $trx->type === 'refund' ? 'text-red-700' : 'text-hanania-purple-dark' }}">
+                                        @if($trx->type === 'refund')
+                                            Penarikan Dana (Refund)
+                                        @else
+                                            {{ ucfirst(str_replace('_', ' ', $trx->type)) }}
                                         @endif
-                                    </div>
+                                    </p>
+                                    
+                                    @if($trx->type === 'refund')
+                                        <p class="text-[9px] text-red-500 mt-1 font-bold">*(Termasuk Potongan Biaya Administrasi)</p>
+                                    @endif
+                                    
+                                    <p class="text-[9px] text-gray-500 mt-1">{{ $trx->created_at->format('d M Y, H:i') }}</p>
                                 </div>
+                                <div class="flex items-center justify-between sm:justify-end gap-3">
+                                    <div class="text-left sm:text-right">
+                                        <!-- Jika refund (nilai minus), warnanya merah. Jika setoran, warnanya ungu -->
+                                        <p class="font-heading text-[16px] font-black {{ $trx->amount < 0 ? 'text-red-600' : 'text-hanania-purple' }}">
+                                            Rp {{ number_format($trx->amount, 0, ',', '.') }}
+                                        </p>
+                                        @if($trx->payment_method === 'midtrans' && $trx->type !== 'refund')
+                                            <p class="text-[9px] text-gray-500 mt-1">
+                                                Fee: Rp {{ number_format((float) $trx->fee_amount, 0, ',', '.') }}
+                                                &nbsp;|&nbsp;
+                                                Netto: Rp {{ number_format((float) ($trx->net_amount ?? $trx->amount), 0, ',', '.') }}
+                                            </p>
+                                        @endif
+                                        <span class="inline-flex mt-1.5 text-[8px] uppercase tracking-wider font-black px-2.5 py-1 rounded-full {{ $trx->status === 'verified' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-red-50 text-red-600 border border-red-200' }}">
+                                            {{ $trx->status }}
+                                        </span>
+                                    </div>
+                                    @if($trx->status === 'verified' && $trx->type !== 'refund')
+                                        <a href="{{ route('customer.receipts.download', $trx->id) }}" target="_blank" class="w-9 h-9 rounded-full bg-white border border-hanania-purple/10 text-hanania-purple flex items-center justify-center hover:bg-hanania-purple hover:text-white transition-colors" title="Unduh Kuitansi">
+                                            <span class="material-symbols-outlined text-[17px]">download</span>
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
                             @empty
                                 @if($pendingMidtrans->isEmpty() && $pendingManual->isEmpty())
                                     <div class="rounded-2xl bg-hanania-purple-light/25 border border-dashed border-hanania-purple/20 p-8 text-center">
@@ -461,6 +482,9 @@
             $bankName = \App\Models\AppInformation::getValue('bank_name', 'Nama Bank');
             $bankAccount = \App\Models\AppInformation::getValue('bank_account_number', 'xxxx-xxxx-xxxx');
             $bankAccountName = \App\Models\AppInformation::getValue('bank_account_name', 'Nama Pemilik Rekening');
+            $midtransFiturAktif = \App\Models\AppInformation::isPaymentMidtransEnabled();
+            $midtransFeeRates = config('services.midtrans.fee_rates', []);
+            $midtransPpnRate = (float) config('services.midtrans.ppn_rate', 0.11);
         @endphp
 
         <div id="paymentModalOverlay" class="fixed inset-0 z-[9999] bg-hanania-purple-dark/60 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4" onclick="closePaymentModal()">
@@ -484,7 +508,7 @@
                         <label class="block text-[11px] font-black text-hanania-purple-dark mb-2">Nominal Setoran</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-hanania-purple-dark/50 font-black text-[14px]">Rp</div>
-                            <input type="number" name="amount" required min="{{ $paymentRules['min_amount'] ?? 500000 }}" max="{{ $progress['sisa_tagihan'] }}"
+                            <input id="paymentAmountInput" type="number" name="amount" required min="{{ $paymentRules['min_amount'] ?? 500000 }}" max="{{ $progress['sisa_tagihan'] }}"
                                    class="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-[15px] font-black text-gray-900 focus:bg-white focus:border-hanania-purple focus:ring-2 focus:ring-hanania-purple/20 outline-none transition-all"
                                    placeholder="{{ number_format($paymentRules['min_amount'] ?? 500000, 0, ',', '.') }}">
                         </div>
@@ -492,35 +516,52 @@
                             <span class="material-symbols-outlined text-[13px] text-hanania-gold">info</span>
                             {{ $paymentRules['label_saran'] ?? 'Minimal setoran Rp 500.000' }}
                         </p>
+
+                        <div id="paymentFeeBreakdown" class="mt-3 rounded-xl border border-hanania-purple/10 bg-hanania-purple-light/20 p-3 hidden">
+                            <div class="flex items-center justify-between text-[10px] text-gray-600">
+                                <span>Setoran masuk ke saldo</span>
+                                <strong id="paymentNetAmount" class="text-gray-800">Rp 0</strong>
+                            </div>
+                            <div class="flex items-center justify-between text-[10px] text-gray-600 mt-1.5">
+                                <span>Fee Midtrans (termasuk PPN)</span>
+                                <strong id="paymentFeeAmount" class="text-amber-600">Rp 0</strong>
+                            </div>
+                            <div class="flex items-center justify-between text-[10px] text-hanania-purple-dark font-black mt-2 pt-2 border-t border-hanania-purple/10">
+                                <span>Total yang dibayar</span>
+                                <strong id="paymentGrossAmount">Rp 0</strong>
+                            </div>
+                        </div>
                     </div>
 
                     <div>
                         <label class="block text-[11px] font-black text-hanania-purple-dark mb-2">Metode Pembayaran</label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <label class="relative cursor-pointer">
-                                <input type="radio" name="payment_method" value="midtrans" class="peer sr-only" required checked onchange="toggleManualUpload()">
-                                <div class="p-3.5 rounded-xl border-2 border-gray-200 bg-white peer-checked:border-hanania-purple peer-checked:bg-hanania-purple-light/10 transition-all">
-                                    <div class="flex items-center gap-2.5">
-                                        <div class="w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 shrink-0">
-                                            <span class="material-symbols-outlined text-[18px] [font-variation-settings:'FILL'_1]">bolt</span>
-                                        </div>
-                                        <div>
-                                            <p class="text-[12px] font-black text-hanania-purple-dark">Otomatis</p>
-                                            <p class="text-[9px] text-gray-500 font-medium mt-0.5">VA, QRIS, E-Wallet</p>
+                            @if($midtransFiturAktif)
+                                <label class="relative cursor-pointer">
+                                    <input type="radio" name="payment_method" value="midtrans" class="peer sr-only" required checked onchange="toggleManualUpload()">
+                                    <div class="p-3.5 rounded-xl border-2 border-gray-200 bg-white peer-checked:border-hanania-purple peer-checked:bg-hanania-purple-light/10 transition-all">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 shrink-0">
+                                                <span class="material-symbols-outlined text-[18px] [font-variation-settings:'FILL'_1]">barcode</span>
+                                            </div>
+                                            <div>
+                                                <p class="text-[12px] font-black text-hanania-purple-dark">Otomatis</p>
+                                                <p class="text-[9px] text-gray-500 font-medium mt-0.5">Qris, Virtual Account</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </label>
+                                </label>
+                            @endif
 
-                            <label class="relative cursor-pointer">
-                                <input type="radio" name="payment_method" value="manual_transfer" class="peer sr-only" required onchange="toggleManualUpload()">
+                            <label class="relative cursor-pointer {{ $midtransFiturAktif ? '' : 'sm:col-span-2' }}">
+                                <input type="radio" name="payment_method" value="manual_transfer" class="peer sr-only" required {{ $midtransFiturAktif ? '' : 'checked' }} onchange="toggleManualUpload()">
                                 <div class="p-3.5 rounded-xl border-2 border-gray-200 bg-white peer-checked:border-hanania-purple peer-checked:bg-hanania-purple-light/10 transition-all">
                                     <div class="flex items-center gap-2.5">
                                         <div class="w-9 h-9 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 shrink-0">
                                             <span class="material-symbols-outlined text-[18px] [font-variation-settings:'FILL'_1]">account_balance</span>
                                         </div>
                                         <div>
-                                            <p class="text-[12px] font-black text-hanania-purple-dark">Manual</p>
+                                            <p class="text-[12px] font-black text-hanania-purple-dark">Transfer Bank</p>
                                             <p class="text-[9px] text-gray-500 font-medium mt-0.5">Upload Bukti TF</p>
                                         </div>
                                     </div>
@@ -528,6 +569,22 @@
                             </label>
                         </div>
                     </div>
+
+                    @if($midtransFiturAktif)
+                        <div class="border-t border-gray-100 pt-4 text-[9px] text-gray-500">
+                            <p class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[13px] text-hanania-gold">info</span>
+                                Untuk pembayaran otomatis, sistem akan membuka halaman Midtrans dan menampilkan metode yang tersedia sesuai bank/e-wallet/QRIS yang aktif.
+                            </p>
+                        </div>
+                    @else
+                        <div class="border-t border-gray-100 pt-4 text-[9px] text-amber-700 bg-amber-50 rounded-xl px-3 py-2 border border-amber-200">
+                            <p class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[13px]">info</span>
+                                Pembayaran otomatis saat ini dinonaktifkan oleh owner. Silakan pilih transfer manual.
+                            </p>
+                        </div>
+                    @endif
 
                     <div id="manualUploadArea" class="hidden border-t border-gray-100 pt-4">
                         <div class="bg-hanania-purple-light/30 border border-hanania-purple/20 rounded-xl p-4 mb-4">
@@ -594,11 +651,52 @@
             document.body.classList.remove('overflow-hidden');
         }
 
+        function formatRupiah(value) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                maximumFractionDigits: 0,
+            }).format(value);
+        }
+
+        function updateFeeBreakdown() {
+            const amountInput = document.getElementById('paymentAmountInput');
+            const feeBreakdown = document.getElementById('paymentFeeBreakdown');
+            const grossAmount = document.getElementById('paymentGrossAmount');
+            const feeAmount = document.getElementById('paymentFeeAmount');
+            const netAmount = document.getElementById('paymentNetAmount');
+
+            if (!amountInput || !feeBreakdown || !grossAmount || !feeAmount || !netAmount) {
+                return;
+            }
+
+            const feeRates = @json($midtransFeeRates);
+            const ppnRate = Number(@json($midtransPpnRate));
+            const rawAmount = Number(amountInput.value || 0);
+            const defaultRate = Number(feeRates['bank_transfer'] ?? feeRates['qris'] ?? 0.0065);
+            const effectiveRate = defaultRate * (1 + ppnRate);
+            const fee = rawAmount * effectiveRate;
+            const gross = rawAmount + fee;
+            const net = rawAmount;
+
+            netAmount.textContent = formatRupiah(net);
+            feeAmount.textContent = formatRupiah(fee);
+            grossAmount.textContent = formatRupiah(gross);
+
+            if (rawAmount > 0) {
+                feeBreakdown.classList.remove('hidden');
+            } else {
+                feeBreakdown.classList.add('hidden');
+            }
+        }
+
         function toggleManualUpload() {
-            const isManual = document.querySelector('input[name="payment_method"][value="manual_transfer"]').checked;
+            const manualRadio = document.querySelector('input[name="payment_method"][value="manual_transfer"]');
             const uploadArea = document.getElementById('manualUploadArea');
             const fileInput = document.getElementById('proofFileInput');
-            if (!uploadArea || !fileInput) return;
+            if (!uploadArea || !fileInput || !manualRadio) return;
+
+            const isManual = manualRadio.checked;
 
             if (isManual) {
                 uploadArea.classList.remove('hidden');
@@ -608,7 +706,14 @@
                 fileInput.removeAttribute('required');
                 fileInput.value = '';
             }
+
+            updateFeeBreakdown();
         }
+
+        document.getElementById('paymentAmountInput')?.addEventListener('input', updateFeeBreakdown);
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleManualUpload();
+        });
 
         function copyRekening() {
             const rekNumber = document.getElementById('rekNumber')?.innerText;
